@@ -7,7 +7,7 @@ class Camera(Document):
 
 class Room(Document):
     cameras = ListField(LazyReferenceField(Camera))
-    name = StringField(required=True)
+    name = StringField(required=True, unique=True)
 
 
 class School(Document):
@@ -17,37 +17,40 @@ class School(Document):
     email = StringField()
 
 
-class Guardian(EmbeddedDocument):
+class User(Document):
     name = StringField(required=True)
-    email = EmailField(required=True)
-    phone = StringField(required=True)
+    phone = StringField()
+    email = StringField(required=True, unique=True)
+    images = ListField(URLField())
+    meta = {'allow_inheritance': True}
 
 
 class Student(Document):
-    student_id = StringField(required=True)
+    student_id = StringField(required=True, unique=True)
     name = StringField()
     grade = StringField(required=True)
     curriculum = StringField(required=True)
-    ref_images = ListField(URLField())
+    images = ListField(URLField())
     is_opt_out_individual = BooleanField(default=False)
     is_opt_out_aggregate = BooleanField(default=False)
-    guardians = ListField(EmbeddedDocumentField(Guardian), required=True)
+
+
+class Guardian(User):
+    students = ListField(ReferenceField(Student), required=True)
 
 
 class StudentGroup(Document):
-    name = StringField(required=True)
+    name = StringField(required=True, unique=True)
     members = ListField(LazyReferenceField(Student))
 
 
-class Teacher(Document):
-    teacher_id = StringField(required=True)
-    name = StringField()
-    email = EmailField(required=True)
+class Teacher(User):
+    teacher_id = StringField(required=True, unique=True)
 
 
 class Klass(Document):
     grade = StringField(required=True)
-    section = StringField(required=True)
+    section = StringField(required=True, unique_with='grade')
     student_groups = ListField(LazyReferenceField(StudentGroup))
     curriculum = StringField()
 
@@ -96,6 +99,30 @@ class SessionPulseStudent(Document):
     attentiveness = IntField()
     engagement = IntField()
     student = LazyReferenceField(Student)
+
+
+class BoundingBox(EmbeddedDocument):
+    x = FloatField(required=True)
+    y = FloatField(required=True)
+    length = FloatField(required=True)
+    width = FloatField(required=True)
+
+
+class FacialAnalysis(EmbeddedDocument):
+    face_bbox = EmbeddedDocumentField(BoundingBox)
+    roll = FloatField()
+    pitch = FloatField()
+    yaw = FloatField()
+
+
+class SessionPulseStudentRaw(Document):
+    frame_id = IntField(required=True)
+    timestamp = DateTimeField(required=True)
+    session = LazyReferenceField(Session, required=True)
+    human_bbox = EmbeddedDocumentField(BoundingBox)
+    facial_analysis = EmbeddedDocumentField(FacialAnalysis)
+    detected_student = ReferenceField(Student)
+    activity = StringField()
 
 
 class SessionIntervention(Document):

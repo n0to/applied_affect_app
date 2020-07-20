@@ -57,24 +57,43 @@ def seed_student(db, fake):
     grade = enum_models.Grade.Sixth.name
     curriculum = enum_models.Curriculum.IB.name
     for i in range(1, 10):
+        st_id = school_prefix + str(random.randint(100, 1000))
+        st_name = fake.name()
+        st = models.Student(student_id=st_id, name=st_name, grade=grade, curriculum=curriculum)
+        print("Saving Student #" + str(i) + ": details: " + st.to_json())
+        st.save()
+        students.append(st)
         g_name = fake.name()
         g_email = g_name.lower().replace(" ", "") + "@example.com"
         g_phone = str(random.randint(7777111111, 9999999999))
-        guardian = models.Guardian(name=g_name, email=g_email, phone=g_phone)
-        student_id = school_prefix + str(random.randint(100, 1000))
-        name = fake.name()
-        st = models.Student(student_id=student_id, name=name, grade=grade, curriculum=curriculum, guardians=[guardian])
-        st.save()
-        students.append(st)
-        print("Saving Student #" + str(i) + ": details: " + st.to_json())
+        guardian = models.Guardian(name=g_name, email=g_email, phone=g_phone, students=[st])
+        print("Saving Guardian " + guardian.to_json())
+        guardian.save()
     return students
 
 
-def seed_teachers(db, fake):
-    pass
+def seed_teacher(db, fake):
+    school_prefix = 'INDT'
+    db.teacher.delete_many({})
+    teachers = []
+    for i in range(1,3):
+        tr_id = school_prefix + str(random.randint(100, 1000))
+        t_name = fake.name()
+        t_email = g_name.lower().replace(" ", "") + "@example.com"
+        t_phone = str(random.randint(7777111111, 9999999999))
+        teacher = models.Teacher(name=t_name, email=t_email, phone=t_phone, teacher_id=tr_id)
+        print("Saving Teacher " + teacher.to_json())
+        teacher.save()
+        teachers.append([teacher])
+    return teachers
 
 
 def seed_klass(db, students):
     pass
+
+
+def seed_session(db, fake):
+    pass
+
 
 main()
