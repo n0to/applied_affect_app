@@ -22,7 +22,7 @@ class User(Document):
     phone = StringField()
     email = StringField(required=True, unique=True)
     images = ListField(URLField())
-    meta = {'allow_inheritance': True}
+    meta = {'abstract': True}
 
 
 class Student(Document):
@@ -40,7 +40,7 @@ class Guardian(User):
 
 
 class StudentGroup(Document):
-    name = StringField(required=True, unique=True)
+    name = StringField(required=True)
     members = ListField(LazyReferenceField(Student))
 
 
@@ -56,12 +56,12 @@ class Klass(Document):
 
 
 class Session(Document):
-    klass = LazyReferenceField(Klass)
-    room = LazyReferenceField(Room)
-    teacher = LazyReferenceField(Teacher)
-    subject = StringField()
-    scheduled_start_time = DateTimeField()
-    scheduled_end_time = DateTimeField()
+    klass = LazyReferenceField(Klass, required=True)
+    room = LazyReferenceField(Room, required=True)
+    teacher = LazyReferenceField(Teacher, required=True)
+    subject = StringField(required=True)
+    scheduled_start_time = DateTimeField(required=True)
+    scheduled_end_time = DateTimeField(required=True)
     actual_start_time = DateTimeField()
     actual_end_time = DateTimeField()
 
