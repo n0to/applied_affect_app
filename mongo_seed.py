@@ -13,13 +13,14 @@ def main():
     print("Getting Mongoengine connection")
     database.DbMgr.connect()
     fake = Faker('en_IN')
-    seed_school(db)
-    cameras = seed_camera(db)
-    rooms = seed_room(db, cameras)
-    students = seed_student(db, fake)
-    teachers = seed_teacher(db, fake)
-    klasses = seed_klass(db, students)
-    sessions = seed_session(db, fake, teachers, klasses, rooms)
+    # seed_school(db)
+    # cameras = seed_camera(db)
+    # rooms = seed_room(db, cameras)
+    # students = seed_student(db, fake)
+    # teachers = seed_teacher(db, fake)
+    # klasses = seed_klass(db, students)
+    # sessions = seed_session(db, fake, teachers, klasses, rooms)
+    seed_session_attendance(db)
     database.DbMgr.disconnect()
 
 
@@ -135,23 +136,51 @@ def seed_session(db, fake, teachers, klasses, rooms):
         en_date_str = year + month + str(day) + " " + str(hour + 1) + ":00:00"
         st_time = datetime.datetime.strptime(st_date_str, "%Y%m%d %H:%M:%S")
         en_time = datetime.datetime.strptime(en_date_str, "%Y%m%d %H:%M:%S")
-        klass = klasses[random.randint(0, len(klasses)-1)]
-        teacher = teachers[random.randint(0, len(teachers)-1)]
-        room = rooms[random.randint(0, len(rooms)-1)]
-        subject = subjects[random.randint(0, len(subjects)-1)].name
-        session = models.Session(klass= klass,
-                                 room= room,
-                                 teacher= teacher,
-                                 subject= subject,
+        klass = klasses[random.randint(0, len(klasses) - 1)]
+        teacher = teachers[random.randint(0, len(teachers) - 1)]
+        room = rooms[random.randint(0, len(rooms) - 1)]
+        subject = subjects[random.randint(0, len(subjects) - 1)].name
+        s_config = models.SessionConfiguration()
+        s_scenario = models.SessionScenario(name=enum_models.Scenario.Lecture.name)
+        session = models.Session(klass=klass,
+                                 room=room,
+                                 teacher=teacher,
+                                 subject=subject,
                                  scheduled_start_time=st_time,
-                                 scheduled_end_time=en_time)
+                                 scheduled_end_time=en_time,
+                                 configs=[s_config],
+                                 scenarios=[s_scenario])
         print("Saving session: ", session.to_json())
         session.save()
         sessions.append(session)
     return sessions
 
 
-def seed_session_pulse(db):
+def seed_session_attendance(db):
+    # Lets to attendance for a session
+    db.session_attendance.delete_many({})
+    db.session_pulse_student.delete_many({})
+    db.session_pulse.delete_many({})
+
+    sessions = models.Session.objects({})
+    attendance = [True, False, True]
+    for session in sessions:
+        klass = session.klass.fetch()
+        for sg in klass.student_groups:
+            sgf = sg.fetch()
+            if sgf.name == 'all':
+                students = sgf.members
+                for student in students:
+                    stf = student.fetch()
+                    print("Saving attendance for student: ", stf.name)
+                    models.SessionAttendance(session=session, student=stf,
+                                             is_present=attendance[random.randint(0, 2)]).save()
+                    print("Saving pulse for student: ", stf.name)
+                    models.SessionPulseStudent(session=session, student=stf, attentiveness=random.randint(70, 100),
+                                               engagement=random.randint(70, 100)).save()
+            print("Saving attendance for student group: ", sgf.name)
+            models.SessionPulse(session=session, student_group=sgf, attentiveness=random.randint(70, 100),
+                                engagement=random.randint(70, 100)).save()
 
 
 main()

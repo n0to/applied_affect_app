@@ -1,5 +1,5 @@
 from mongoengine import *
-
+import datetime
 
 class Camera(Document):
     name = StringField()
@@ -55,6 +55,21 @@ class Klass(Document):
     curriculum = StringField()
 
 
+class SessionConfiguration(EmbeddedDocument):
+    timestamp = DateTimeField(default=datetime.datetime.now())
+    # Minimum students in percentage to demonstrate some behavior to trigger class intervention
+    th_min_student_for_int = FloatField(default=0.5)
+    # Minimum time between two interventions. In seconds
+    th_min_gap_bet_int = IntField(default=300)
+    # Minimum time of observation before generating a student intervention. In seconds
+    th_min_gap_for_student_int = IntField(default=180)
+
+
+class SessionScenario(EmbeddedDocument):
+    timestamp = DateTimeField(default=datetime.datetime.now())
+    name = StringField(required=True)
+
+
 class Session(Document):
     klass = LazyReferenceField(Klass, required=True)
     room = LazyReferenceField(Room, required=True)
@@ -64,21 +79,8 @@ class Session(Document):
     scheduled_end_time = DateTimeField(required=True)
     actual_start_time = DateTimeField()
     actual_end_time = DateTimeField()
-
-
-class SessionConfiguration(Document):
-    session = LazyReferenceField(Session)
-    # Minimum students in percentage to demonstrate some behavior to trigger class intervention
-    th_min_student_for_int = FloatField(default=0.5)
-    # Minimum time between two interventions. In seconds
-    th_min_gap_bet_int = IntField(default=300)
-    # Minimum time of observation before generating a student intervention. In seconds
-    th_min_gap_for_student_int = IntField(default=180)
-
-
-class SessionScenario(Document):
-    session = LazyReferenceField(Session)
-    scenario = StringField(required=True)
+    scenarios = ListField(EmbeddedDocumentField(SessionScenario))
+    configs = ListField(EmbeddedDocumentField(SessionConfiguration))
 
 
 class SessionAttendance(Document):
