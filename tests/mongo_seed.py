@@ -1,6 +1,6 @@
 import models
-import database
-import enum_models
+from db import database
+from models import enum_models
 import random
 from faker import Faker
 import datetime

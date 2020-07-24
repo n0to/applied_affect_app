@@ -1,5 +1,5 @@
 from fastapi import APIRouter, FastAPI
-from .database import DbMgr
+from db.database import DbMgr
 from .routers import session, authentication
 
 app = FastAPI()

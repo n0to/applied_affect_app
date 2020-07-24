@@ -38,6 +38,11 @@ def update_student():
     pass
 
 
+@router.post("/student/{id}")
+def create_student():
+    pass
+
+
 @router.put("/guardian/{id}")
 def update_guardian():
     pass

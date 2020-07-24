@@ -1,58 +1,10 @@
-from mongoengine import *
 import datetime
 
-class Camera(Document):
-    name = StringField()
+from mongoengine import EmbeddedDocument, DateTimeField, FloatField, IntField, StringField, Document, \
+    LazyReferenceField, ListField, EmbeddedDocumentField, BooleanField, ReferenceField
 
-
-class Room(Document):
-    cameras = ListField(LazyReferenceField(Camera))
-    name = StringField(required=True, unique=True)
-
-
-class School(Document):
-    name = StringField(required=True)
-    group_name = StringField()
-    location = StringField()
-    email = StringField()
-
-
-class User(Document):
-    name = StringField(required=True)
-    phone = StringField()
-    email = StringField(required=True, unique=True)
-    images = ListField(URLField())
-    meta = {'abstract': True}
-
-
-class Student(Document):
-    student_id = StringField(required=True, unique=True)
-    name = StringField()
-    grade = StringField(required=True)
-    curriculum = StringField(required=True)
-    images = ListField(URLField())
-    is_opt_out_individual = BooleanField(default=False)
-    is_opt_out_aggregate = BooleanField(default=False)
-
-
-class Guardian(User):
-    students = ListField(ReferenceField(Student), required=True)
-
-
-class StudentGroup(Document):
-    name = StringField(required=True)
-    members = ListField(LazyReferenceField(Student))
-
-
-class Teacher(User):
-    teacher_id = StringField(required=True, unique=True)
-
-
-class Klass(Document):
-    grade = StringField(required=True)
-    section = StringField(required=True, unique_with='grade')
-    student_groups = ListField(LazyReferenceField(StudentGroup))
-    curriculum = StringField()
+from models.school import Room, Klass
+from models.user import Student, StudentGroup, Teacher
 
 
 class SessionConfiguration(EmbeddedDocument):
@@ -129,22 +81,3 @@ class SessionPulseStudentRaw(Document):
 
 class SessionIntervention(Document):
     pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
