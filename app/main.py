@@ -2,13 +2,15 @@ from fastapi import APIRouter, FastAPI
 from fastapi.logger import logger
 import logging
 from app.db.database import DbMgr
-from app.routers import session, authentication, student, teacher
+from app.routers import session, authentication, student, teacher, pulse, school
 
 app = FastAPI()
 router = APIRouter()
 app.include_router(session.router)
 app.include_router(student.router)
 app.include_router(teacher.router)
+app.include_router(pulse.router)
+app.include_router(school.router)
 app.include_router(authentication.router)
 logger.setLevel(logging.DEBUG)
 

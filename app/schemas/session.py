@@ -35,19 +35,6 @@ class Session(SessionCreate):
     video_url: Optional[List[str]]
 
 
-class SessionAttendanceAggregated(BaseModel):
-    present: int
-    unknown: int
-    total: int
-
-
-class SessionPulse(BaseModel):
-    timestamp: datetime
-    student_group_name: str
-    attentiveness: int
-    engagement: int
-
-
 class Student(BaseModel):
     student_id: str
     name: Optional[str]

@@ -1,11 +1,9 @@
 from app.models.session import (
     Session,
     SessionConfiguration,
-    SessionScenario,
-    SessionAttendance,
-    SessionPulse,
-    SessionPulseStudent
+    SessionScenario
 )
+from app.models.pulse import SessionAttendance, SessionPulse, SessionPulseStudent
 
 from app.models.enum_models import (
     Section,

@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, ListField, URLField, BooleanField, ReferenceField, LazyReferenceField
+from mongoengine import Document, StringField, ListField, URLField
 
 
 class User(Document):
@@ -9,24 +9,3 @@ class User(Document):
     meta = {'abstract': True}
 
 
-class Student(Document):
-    student_id = StringField(required=True, unique=True)
-    name = StringField()
-    grade = StringField(required=True)
-    curriculum = StringField(required=True)
-    images = ListField(URLField())
-    is_opt_out_individual = BooleanField(default=False)
-    is_opt_out_aggregate = BooleanField(default=False)
-
-
-class Guardian(User):
-    students = ListField(ReferenceField(Student), required=True)
-
-
-class StudentGroup(Document):
-    name = StringField(required=True)
-    members = ListField(LazyReferenceField(Student))
-
-
-class Teacher(User):
-    teacher_id = StringField(required=True, unique=True)

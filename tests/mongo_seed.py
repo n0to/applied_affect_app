@@ -1,6 +1,12 @@
-from app import models
+from app.models.pulse import *
+from app.models.school import *
+from app.models.grading import *
+from app.models.session import *
+from app.models.student import *
+from app.models.teacher import *
+from app.models.enum_models import *
+
 from app.db import database
-from app.models import enum_models
 import random
 from faker import Faker
 import datetime
@@ -27,7 +33,7 @@ def main():
 def seed_school(db):
     # Add school
     db.school.delete_many({})
-    indus = models.School(name='Indus International School')
+    indus = School(name='Indus International School')
     indus.group_name = 'Indus International School'
     indus.location = 'Bangalore'
     indus.email = "contactus@indus.com"
@@ -37,11 +43,11 @@ def seed_school(db):
 
 def seed_camera(db):
     db.camera.delete_many({})
-    camera1 = models.Camera(name='Intel Intellisense')
+    camera1 = Camera(name='Intel Intellisense')
     print("adding camera1", camera1.to_mongo())
     camera1.save()
 
-    camera2 = models.Camera(name='Intel Intellisense')
+    camera2 = Camera(name='Intel Intellisense')
     print("adding camera2", camera2.to_mongo())
     camera2.save()
 
@@ -50,10 +56,10 @@ def seed_camera(db):
 
 def seed_room(db, cameras):
     db.room.delete_many({})
-    room1 = models.Room(name='ClassRoom A GF')
+    room1 = Room(name='ClassRoom A GF')
     room1.cameras = cameras
     room1.save()
-    room2 = models.Room(name='ClassRoom B GF')
+    room2 = Room(name='ClassRoom B GF')
     room2.cameras = cameras
     room2.save()
     return [room1, room2]
@@ -64,19 +70,19 @@ def seed_student(db, fake):
     db.guardian.delete_many({})
     school_prefix = 'IND'
     students = []
-    grade = enum_models.Grade.Sixth.name
-    curriculum = enum_models.Curriculum.IB.name
+    grade = Grade.Sixth.name
+    curriculum = Curriculum.IB.name
     for i in range(1, 20):
         st_id = school_prefix + str(random.randint(100, 1000))
         st_name = fake.name()
-        st = models.Student(student_id=st_id, name=st_name, grade=grade, curriculum=curriculum)
+        st = Student(student_id=st_id, name=st_name, grade=grade, curriculum=curriculum)
         print("Saving Student #" + str(i) + ": details: " + st.to_json())
         st.save()
         students.append(st)
         g_name = fake.name()
         g_email = g_name.lower().replace(" ", "") + "@example.com"
         g_phone = str(random.randint(7777111111, 9999999999))
-        guardian = models.Guardian(name=g_name, email=g_email, phone=g_phone, students=[st])
+        guardian = Guardian(name=g_name, email=g_email, phone=g_phone, students=[st])
         print("Saving Guardian " + guardian.to_json())
         guardian.save()
     return students
@@ -91,7 +97,7 @@ def seed_teacher(db, fake):
         t_name = fake.name()
         t_email = t_name.lower().replace(" ", "") + "@example.com"
         t_phone = str(random.randint(7777111111, 9999999999))
-        teacher = models.Teacher(name=t_name, email=t_email, phone=t_phone, teacher_id=t_id)
+        teacher = Teacher(name=t_name, email=t_email, phone=t_phone, teacher_id=t_id)
         print("Saving Teacher " + teacher.to_json())
         teacher.save()
         teachers.append(teacher)
@@ -101,23 +107,23 @@ def seed_teacher(db, fake):
 def seed_klass(db, students):
     db.klass.delete_many({})
     db.student_group.delete_many({})
-    grade = enum_models.Grade.Sixth.name
-    section = enum_models.Section.A.name
-    curriculum = enum_models.Curriculum.IB.name
-    sg1 = models.StudentGroup(name='all', members=students[:10]).save()
-    sg2 = models.StudentGroup(name='Top Performers', members=students[:3]).save()
-    sg3 = models.StudentGroup(name='Low Performers', members=students[4:8]).save()
-    klass1 = models.Klass(grade=grade, section=section, curriculum=curriculum, student_groups=[sg1, sg2, sg3])
+    grade = Grade.Sixth.name
+    section = Section.A.name
+    curriculum = Curriculum.IB.name
+    sg1 = StudentGroup(name='all', members=students[:10]).save()
+    sg2 = StudentGroup(name='Top Performers', members=students[:3]).save()
+    sg3 = StudentGroup(name='Low Performers', members=students[4:8]).save()
+    klass1 = Klass(grade=grade, section=section, curriculum=curriculum, student_groups=[sg1, sg2, sg3])
     klass1.save()
     print("Saving Klass " + klass1.to_json())
 
-    grade = enum_models.Grade.Sixth.name
-    section = enum_models.Section.B.name
-    curriculum = enum_models.Curriculum.IB.name
-    sg4 = models.StudentGroup(name='all', members=students[10:]).save()
-    sg5 = models.StudentGroup(name='Top Performers', members=students[10:13]).save()
-    sg6 = models.StudentGroup(name='Low Performers', members=students[14:18]).save()
-    klass2 = models.Klass(grade=grade, section=section, curriculum=curriculum, student_groups=[sg4, sg5, sg6])
+    grade = Grade.Sixth.name
+    section = Section.B.name
+    curriculum = Curriculum.IB.name
+    sg4 = StudentGroup(name='all', members=students[10:]).save()
+    sg5 = StudentGroup(name='Top Performers', members=students[10:13]).save()
+    sg6 = StudentGroup(name='Low Performers', members=students[14:18]).save()
+    klass2 = Klass(grade=grade, section=section, curriculum=curriculum, student_groups=[sg4, sg5, sg6])
     print("Saving Klass " + klass2.to_json())
     klass2.save()
     return [klass1, klass2]
@@ -126,7 +132,7 @@ def seed_klass(db, students):
 def seed_session(db, fake, teachers, klasses, rooms):
     sessions = []
     db.session.delete_many({})
-    subjects = [enum_models.Subject.Civics, enum_models.Subject.Biology, enum_models.Subject.Chemistry]
+    subjects = [Subject.Civics, Subject.Biology, Subject.Chemistry]
     for i in range(1, 10):
         hour = random.randint(10, 11)
         year = '2020'
@@ -140,16 +146,16 @@ def seed_session(db, fake, teachers, klasses, rooms):
         teacher = teachers[random.randint(0, len(teachers) - 1)]
         room = rooms[random.randint(0, len(rooms) - 1)]
         subject = subjects[random.randint(0, len(subjects) - 1)].name
-        s_config = models.SessionConfiguration()
-        s_scenario = models.SessionScenario(name=enum_models.Scenario.Lecture.name)
-        session = models.Session(klass=klass,
-                                 room=room,
-                                 teacher=teacher,
-                                 subject=subject,
-                                 scheduled_start_time=st_time,
-                                 scheduled_end_time=en_time,
-                                 configs=[s_config],
-                                 scenarios=[s_scenario])
+        s_config = SessionConfiguration()
+        s_scenario = SessionScenario(name=Scenario.Lecture.name)
+        session = Session(klass=klass,
+                          room=room,
+                          teacher=teacher,
+                          subject=subject,
+                          scheduled_start_time=st_time,
+                          scheduled_end_time=en_time,
+                          configs=[s_config],
+                          scenarios=[s_scenario])
         print("Saving session: ", session.to_json())
         session.save()
         sessions.append(session)
@@ -162,7 +168,7 @@ def seed_session_attendance(db):
     db.session_pulse_student.delete_many({})
     db.session_pulse.delete_many({})
 
-    sessions = models.Session.objects({})
+    sessions = Session.objects({})
     attendance = [True, False, True]
     for session in sessions:
         klass = session.klass.fetch()
@@ -173,14 +179,14 @@ def seed_session_attendance(db):
                 for student in students:
                     stf = student.fetch()
                     print("Saving attendance for student: ", stf.name)
-                    models.SessionAttendance(session=session, student=stf,
-                                             is_present=attendance[random.randint(0, 2)]).save()
+                    SessionAttendance(session=session, student=stf,
+                                      is_present=attendance[random.randint(0, 2)]).save()
                     print("Saving pulse for student: ", stf.name)
-                    models.SessionPulseStudent(session=session, student=stf, attentiveness=random.randint(70, 100),
-                                               engagement=random.randint(70, 100)).save()
+                    SessionPulseStudent(session=session, student=stf, attentiveness=random.randint(70, 100),
+                                        engagement=random.randint(70, 100)).save()
             print("Saving attendance for student group: ", sgf.name)
-            models.SessionPulse(session=session, student_group=sgf, attentiveness=random.randint(70, 100),
-                                engagement=random.randint(70, 100)).save()
+            SessionPulse(session=session, student_group=sgf, attentiveness=random.randint(70, 100),
+                         engagement=random.randint(70, 100)).save()
 
 
 main()
