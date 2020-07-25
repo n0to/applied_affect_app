@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, ListField, LazyReferenceField
+from mongoengine import Document, StringField, ListField, LazyReferenceField, URLField
 
 from app.models.user import StudentGroup
 
@@ -12,6 +12,8 @@ class School(Document):
 
 class Camera(Document):
     name = StringField()
+    stream_url = URLField()
+    position = StringField()
 
 
 class Room(Document):
