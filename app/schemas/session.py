@@ -1,11 +1,11 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from models.enum_models import Scenario, Subject
+from ..models.enum_models import Scenario, Subject
 
 
 class SessionConfiguration(BaseModel):
-    timestamp: Optional[datetime] = Field(None, description="Timestamp")
+    timestamp: Optional[datetime] = Field(None, description="add description")
     th_min_student_for_int: Optional[float] = Field(None, title="Threshold")
     th_min_gap_bet_int: Optional[int] = Field(None, title="Threshold")
     th_min_gap_for_student_int: Optional[int] = Field(None, title="Threshold")

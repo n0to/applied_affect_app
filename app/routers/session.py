@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..schemas.session import *
+from app.schemas.session import SessionCreate
 
 router = APIRouter()
 

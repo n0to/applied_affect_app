@@ -1,6 +1,6 @@
 from mongoengine import Document, StringField, ListField, LazyReferenceField
 
-from models.user import StudentGroup
+from app.models.user import StudentGroup
 
 
 class School(Document):

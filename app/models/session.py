@@ -3,8 +3,8 @@ import datetime
 from mongoengine import EmbeddedDocument, DateTimeField, FloatField, IntField, StringField, Document, \
     LazyReferenceField, ListField, EmbeddedDocumentField, BooleanField, ReferenceField
 
-from models.school import Room, Klass
-from models.user import Student, StudentGroup, Teacher
+from app.models.school import Room, Klass
+from app.models.user import Student, StudentGroup, Teacher
 
 
 class SessionConfiguration(EmbeddedDocument):
@@ -33,6 +33,7 @@ class Session(Document):
     actual_end_time = DateTimeField()
     scenarios = ListField(EmbeddedDocumentField(SessionScenario))
     configs = ListField(EmbeddedDocumentField(SessionConfiguration))
+    video_url = ListField(StringField())
 
 
 class SessionAttendance(Document):
