@@ -1,7 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from ..models.enum_models import Scenario, Subject
+from app.models.enum_models import Scenario, Subject
+from app.schemas.teacher import Teacher
 
 
 class SessionConfiguration(BaseModel):
@@ -20,6 +21,7 @@ class SessionCreate(BaseModel):
     klass: str
     room: str
     subject: Subject
+    teacher: Teacher
     scheduled_start_time: datetime
     scheduled_end_time: datetime
     scenarios: Optional[List[SessionScenario]] = Field(None, title="List of scenarios")
@@ -30,6 +32,7 @@ class Session(SessionCreate):
     id: str
     actual_start_time: Optional[datetime]
     actual_end_time: Optional[datetime]
+    video_url: Optional[List[str]]
 
 
 class SessionAttendanceAggregated(BaseModel):
@@ -50,13 +53,6 @@ class Student(BaseModel):
     name: Optional[str]
     current_grade: Optional[str]
     current_board: Optional[str]
-    ref_image_urls: List[str]
-
-
-class Teacher(BaseModel):
-    teacher_id: str
-    name: str
-    email: str
     ref_image_urls: List[str]
 
 

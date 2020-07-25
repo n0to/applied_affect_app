@@ -29,3 +29,5 @@ class TestMongo(unittest.TestCase):
         session_id = '5f182bd52cd7d726a7155f91'
         session = get_session(session_id=session_id)
         pp.pprint(dict(session.to_mongo()))
+        pp.pprint(str(session.id))
+        pp.pprint(str(session.teacher.fetch().name))
