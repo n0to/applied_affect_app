@@ -1,6 +1,20 @@
 from enum import Enum
 
 
+class SessionState(str, Enum):
+    Scheduled = "Scheduled",
+    Started = "Started",
+    Ended = "Ended",
+    Cancelled = "Cancelled"
+    Paused = "Paused"
+
+
+class InterventionThresholdsDefaults(float, Enum):
+    MIN_STUDENT_FOR_INT = 50,
+    MIN_GAP_BET_INT = 300,
+    MIN_GAP_BET_STUDENT_INT = 180
+
+
 class Scenario(str, Enum):
     Lecture = "Lecture",
     Quiz = "Quiz",

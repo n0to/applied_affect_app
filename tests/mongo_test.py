@@ -2,8 +2,9 @@ import unittest
 from app.db.database import DbMgr
 import sys
 import logging
-from app.crud.session import *
 import pprint
+from app.models.session import Session as ModelSession
+from app.schemas.session import Session as SchemaSession
 
 logger = logging.getLogger()
 logger.level = logging.DEBUG
@@ -27,7 +28,13 @@ class TestMongo(unittest.TestCase):
 
     def test_get_session(self):
         session_id = '5f182bd52cd7d726a7155f91'
-        session = get_session(session_id=session_id)
-        pp.pprint(dict(session.to_mongo()))
-        pp.pprint(str(session.id))
-        pp.pprint(str(session.teacher.fetch().name))
+        sess = ModelSession.objects.get(id=session_id)
+        pp.pprint(dict(sess.to_mongo()))
+        pp.pprint("********************************************************")
+        sout = SchemaSession.from_orm(sess)
+        pp.pprint(sout)
+
+        #session = get_session(session_id=session_id)
+        #pp.pprint(dict(session.to_mongo()))
+        #pp.pprint(str(session.id))
+        #pp.pprint(str(session.teacher.fetch().name))

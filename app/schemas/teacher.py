@@ -10,4 +10,5 @@ class TeacherCreate(BaseModel):
 
 
 class Teacher(TeacherCreate):
-    pass
+    class Config:
+        orm_mode = True
