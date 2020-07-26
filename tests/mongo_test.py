@@ -30,9 +30,12 @@ class TestMongo(unittest.TestCase):
         session_id = '5f182bd52cd7d726a7155f91'
         sess = ModelSession.objects.get(id=session_id)
         pp.pprint(dict(sess.to_mongo()))
+        pp.pprint(sess.klass.grade)
+        pp.pprint(sess.room.name)
         pp.pprint("********************************************************")
         sout = SchemaSession.from_orm(sess)
-        pp.pprint(sout)
+        sout.session_id = str(sess.id)
+        pp.pprint(sout.dict())
 
         #session = get_session(session_id=session_id)
         #pp.pprint(dict(session.to_mongo()))

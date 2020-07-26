@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, ListField, LazyReferenceField, URLField
+from mongoengine import Document, StringField, ListField, LazyReferenceField, URLField, ReferenceField
 
 from app.models.student import StudentGroup
 
@@ -17,7 +17,7 @@ class Camera(Document):
 
 
 class Room(Document):
-    cameras = ListField(LazyReferenceField(Camera))
+    cameras = ListField(ReferenceField(Camera))
     name = StringField(required=True, unique=True)
 
 
