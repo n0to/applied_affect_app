@@ -5,11 +5,8 @@ import logging
 import pprint
 from app.models.session import Session as ModelSession
 from app.schemas.session import Session as SchemaSession
+from app.config import get_settings
 
-logger = logging.getLogger()
-logger.level = logging.DEBUG
-stream_handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(stream_handler)
 
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 
@@ -17,14 +14,18 @@ pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 class TestMongo(unittest.TestCase):
     @classmethod
     def setUp(cls):
-        DbMgr.connect()
+        settings = get_settings()
+        DbMgr.connect(settings.mongo_dbname,
+                      settings.mongo_username,
+                      settings.mongo_password,
+                      settings.mongo_host)
 
     @classmethod
     def tearDown(cls):
         DbMgr.disconnect()
 
-    def testConnection(self):
-        logger.debug("Established the connection and tested it")
+    def test_connection(self):
+        pp.pprint("Established the connection and tested it")
 
     def test_get_session(self):
         session_id = '5f182bd52cd7d726a7155f91'

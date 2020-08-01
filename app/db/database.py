@@ -1,17 +1,15 @@
 from mongoengine import connect, disconnect
 from pymongo import MongoClient
 
-uri = "mongodb+srv://tip_user:tip_password@aa.jiqjp.mongodb.net/test"
-
 
 class DbMgr:
 
     @staticmethod
-    def connect():
-        connect(db='tip',
-                username='tip_user',
-                password='tip_password',
-                host='mongodb+srv://aa.jiqjp.mongodb.net')
+    def connect(db: str, username: str, password: str, host: str):
+        connect(db=db,
+                username=username,
+                password=password,
+                host=host)
 
     @staticmethod
     def disconnect():
@@ -22,14 +20,8 @@ class DbMgrPymongo:
     database = None
 
     @staticmethod
-    def initialize():
-        if DbMgrPymongo.database is None:
-            client = MongoClient(uri)
-            DbMgrPymongo.database = client['tip']
-
-    @staticmethod
-    def get_db():
+    def get_db(uri: str, db: str):
         if DbMgrPymongo.database is None:
             DbMgrPymongo.client = MongoClient(uri)
-            DbMgrPymongo.database = DbMgrPymongo.client['tip']
+            DbMgrPymongo.database = DbMgrPymongo.client[db]
         return DbMgrPymongo.database
