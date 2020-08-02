@@ -42,3 +42,5 @@ uvicorn==0.11.5
 uvloop==0.14.0
 wcwidth==0.2.5
 websockets==8.1
+
+passlib~=1.7.2

@@ -6,7 +6,7 @@ class User(Document):
     phone = StringField(max_length=10)
     email = EmailField(unique=True)
     images = ListField(URLField())
-    password = StringField(max_length=20)
+    hashed_password = StringField(max_length=20)
     meta = {'allow_inheritance': True}
 
 

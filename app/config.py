@@ -30,3 +30,6 @@ class Settings(BaseSettings):
     mongo_username: str
     mongo_password: str
     mongo_host: str
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
