@@ -1,14 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from app.schemas.user import User
 
-class TeacherCreate(BaseModel):
+
+class Teacher(User):
     teacher_id: str
-    name: str
-    email: str
-    ref_image_urls: Optional[List[str]]
 
-
-class Teacher(TeacherCreate):
     class Config:
         orm_mode = True
