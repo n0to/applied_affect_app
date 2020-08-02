@@ -1,9 +1,10 @@
 import unittest
 from app.db.database import DbMgr
-import sys
-import logging
 import pprint
 from app.models.session import Session as ModelSession
+from app.models.user import User as ModelUser
+from app.models.student import Guardian as ModelGuardian
+from app.models.teacher import Teacher as ModelTeacher
 from app.schemas.session import Session as SchemaSession
 from app.config import get_settings
 
@@ -42,3 +43,9 @@ class TestMongo(unittest.TestCase):
         #pp.pprint(dict(session.to_mongo()))
         #pp.pprint(str(session.id))
         #pp.pprint(str(session.teacher.fetch().name))
+
+    def test_get_user(self):
+        email = "kevinmiles@example.com"
+        usr = ModelGuardian.objects.get(email=email)
+        pp.pprint(usr.name)
+

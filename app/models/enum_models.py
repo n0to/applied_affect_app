@@ -9,7 +9,7 @@ class SessionState(str, Enum):
     Paused = "Paused"
 
 
-class InterventionThresholdsDefaults(float, Enum):
+class InterventionThresholdsDefaults(int, Enum):
     MIN_STUDENT_FOR_INT = 50,
     MIN_GAP_BET_INT = 300,
     MIN_GAP_BET_STUDENT_INT = 180
@@ -35,7 +35,6 @@ class Grade(str, Enum):
     Tenth = "10",
     Eleventh = "11",
     Twelfth = "12"
-    SixthAgain = "Sixth"
 
 
 class Subject(str, Enum):

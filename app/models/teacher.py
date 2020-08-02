@@ -4,4 +4,4 @@ from app.models.user import User
 
 
 class Teacher(User):
-    teacher_id = StringField(required=True, unique=True)
+    teacher_id = StringField(max_length=10)

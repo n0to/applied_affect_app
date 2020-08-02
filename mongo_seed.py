@@ -1,31 +1,42 @@
 from app.models.pulse import *
 from app.models.school import *
-from app.models.grading import *
 from app.models.session import *
 from app.models.student import *
 from app.models.teacher import *
 from app.models.enum_models import *
-
 from app.db import database
 import random
 from faker import Faker
 import datetime
+import os
+from app.config import get_settings_from_file
+import pprint
+
+pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 
 
 def main():
+    conf = os.path.dirname(os.path.realpath(__file__)) + "/app/dev.env"
+    print(f"Reading Settings: {conf}")
+    settings = get_settings_from_file(conf)
+    pp.pprint(settings.dict())
     print("Getting Pymongo connection")
-    database.DbMgrPymongo.initialize()
-    db = database.DbMgrPymongo.get_db()
+    db = database.DbMgrPymongo.get_db(uri=settings.mongo_conn_str,
+                                      db=settings.mongo_dbname)
     print("Getting Mongoengine connection")
-    database.DbMgr.connect()
+    database.DbMgr.connect(db=settings.mongo_dbname,
+                           username=settings.mongo_username,
+                           password=settings.mongo_password,
+                           host=settings.mongo_host)
     fake = Faker('en_IN')
-    # seed_school(db)
-    # cameras = seed_camera(db)
-    # rooms = seed_room(db, cameras)
-    # students = seed_student(db, fake)
-    # teachers = seed_teacher(db, fake)
-    # klasses = seed_klass(db, students)
-    # sessions = seed_session(db, fake, teachers, klasses, rooms)
+    seed_school(db)
+    cameras = seed_camera(db)
+    rooms = seed_room(db, cameras)
+    db.user.delete_many({})
+    students = seed_student(db, fake)
+    teachers = seed_teacher(db, fake)
+    klasses = seed_klass(db, students)
+    sessions = seed_session(db, fake, teachers, klasses, rooms)
     seed_session_attendance(db)
     database.DbMgr.disconnect()
 
@@ -43,12 +54,12 @@ def seed_school(db):
 
 def seed_camera(db):
     db.camera.delete_many({})
-    camera1 = Camera(name='Intel Intellisense')
-    print("adding camera1", camera1.to_mongo())
+    camera1 = Camera(name='Intel Intellisense', stream_url='http://camera1.com')
+    print("Adding camera1", camera1.to_mongo())
     camera1.save()
 
-    camera2 = Camera(name='Intel Intellisense')
-    print("adding camera2", camera2.to_mongo())
+    camera2 = Camera(name='Intel Intellisense', stream_url='http://camera2.com')
+    print("Adding camera2", camera2.to_mongo())
     camera2.save()
 
     return [camera1, camera2]
@@ -56,33 +67,40 @@ def seed_camera(db):
 
 def seed_room(db, cameras):
     db.room.delete_many({})
-    room1 = Room(name='ClassRoom A GF')
-    room1.cameras = cameras
+    room1 = Room(name='ClassRoom 1 GF')
+    room1.cameras = [cameras[0]]
     room1.save()
-    room2 = Room(name='ClassRoom B GF')
-    room2.cameras = cameras
+    room2 = Room(name='ClassRoom 2 GF')
+    room2.cameras = [cameras[1]]
     room2.save()
     return [room1, room2]
 
 
 def seed_student(db, fake):
-    db.student.delete_many({})
-    db.guardian.delete_many({})
     school_prefix = 'IND'
     students = []
-    grade = Grade.Sixth.name
-    curriculum = Curriculum.IB.name
+    grade = Grade.Sixth
+    curriculum = Curriculum.IB
     for i in range(1, 20):
         st_id = school_prefix + str(random.randint(100, 1000))
         st_name = fake.name()
-        st = Student(student_id=st_id, name=st_name, grade=grade, curriculum=curriculum)
+        st_email = st_name.lower().replace(" ", "") + str(random.randint(0, 100)) + "@example.com"
+        st = Student(student_id=st_id,
+                     name=st_name,
+                     grade=grade,
+                     curriculum=curriculum,
+                     email=st_email)
         print("Saving Student #" + str(i) + ": details: " + st.to_json())
         st.save()
         students.append(st)
+
         g_name = fake.name()
-        g_email = g_name.lower().replace(" ", "") + "@example.com"
+        g_email = g_name.lower().replace(" ", "") + str(random.randint(0, 100)) + "@example.com"
         g_phone = str(random.randint(7777111111, 9999999999))
-        guardian = Guardian(name=g_name, email=g_email, phone=g_phone, students=[st])
+        guardian = Guardian(name=g_name,
+                            email=g_email,
+                            phone=g_phone,
+                            students=[st])
         print("Saving Guardian " + guardian.to_json())
         guardian.save()
     return students
@@ -90,14 +108,16 @@ def seed_student(db, fake):
 
 def seed_teacher(db, fake):
     school_prefix = 'INDT'
-    db.teacher.delete_many({})
     teachers = []
     for i in range(1, 3):
         t_id = school_prefix + str(random.randint(100, 1000))
         t_name = fake.name()
-        t_email = t_name.lower().replace(" ", "") + "@example.com"
+        t_email = t_name.lower().replace(" ", "") + str(random.randint(0, 100)) + "@example.com"
         t_phone = str(random.randint(7777111111, 9999999999))
-        teacher = Teacher(name=t_name, email=t_email, phone=t_phone, teacher_id=t_id)
+        teacher = Teacher(name=t_name,
+                          email=t_email,
+                          phone=t_phone,
+                          teacher_id=t_id)
         print("Saving Teacher " + teacher.to_json())
         teacher.save()
         teachers.append(teacher)
@@ -107,19 +127,22 @@ def seed_teacher(db, fake):
 def seed_klass(db, students):
     db.klass.delete_many({})
     db.student_group.delete_many({})
-    grade = Grade.Sixth.name
-    section = Section.A.name
-    curriculum = Curriculum.IB.name
+    grade = Grade.Sixth
+    section = Section.A
+    curriculum = Curriculum.IB
     sg1 = StudentGroup(name='all', members=students[:10]).save()
     sg2 = StudentGroup(name='Top Performers', members=students[:3]).save()
     sg3 = StudentGroup(name='Low Performers', members=students[4:8]).save()
-    klass1 = Klass(grade=grade, section=section, curriculum=curriculum, student_groups=[sg1, sg2, sg3])
+    klass1 = Klass(grade=grade,
+                   section=section,
+                   curriculum=curriculum,
+                   student_groups=[sg1, sg2, sg3])
     klass1.save()
     print("Saving Klass " + klass1.to_json())
 
-    grade = Grade.Sixth.name
-    section = Section.B.name
-    curriculum = Curriculum.IB.name
+    grade = Grade.Sixth
+    section = Section.B
+    curriculum = Curriculum.IB
     sg4 = StudentGroup(name='all', members=students[10:]).save()
     sg5 = StudentGroup(name='Top Performers', members=students[10:13]).save()
     sg6 = StudentGroup(name='Low Performers', members=students[14:18]).save()
@@ -155,7 +178,8 @@ def seed_session(db, fake, teachers, klasses, rooms):
                           scheduled_start_time=st_time,
                           scheduled_end_time=en_time,
                           configs=[s_config],
-                          scenarios=[s_scenario])
+                          scenarios=[s_scenario],
+                          state=SessionState.Ended)
         print("Saving session: ", session.to_json())
         session.save()
         sessions.append(session)
@@ -171,7 +195,7 @@ def seed_session_attendance(db):
     sessions = Session.objects({})
     attendance = [True, False, True]
     for session in sessions:
-        klass = session.klass.fetch()
+        klass = session.klass
         for sg in klass.student_groups:
             sgf = sg.fetch()
             if sgf.name == 'all':
