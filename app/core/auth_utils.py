@@ -29,8 +29,8 @@ def create_access_token(data: dict, expires_delta: Optional[datetime.timedelta] 
     return encoded_jwt
 
 
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
+def authenticate_user(email: str, password: str):
+    user = get_user(email=email)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
