@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
-from app.schemas.student import Student, StudentGroup
+from app.schemas.student import Student
 
 
 class SessionAttendanceAggregated(BaseModel):
@@ -20,7 +20,7 @@ class SessionAttendance(BaseModel):
 
 class SessionPulse(BaseModel):
     timestamp: Optional[datetime]
-    student_group: StudentGroup
+    student_group_name: Optional[str]
     attentiveness: int
     engagement: int
 

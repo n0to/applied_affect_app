@@ -15,14 +15,14 @@ class SessionPulse(Document):
     session = LazyReferenceField(Session)
     attentiveness = IntField()
     engagement = IntField()
-    student_group = LazyReferenceField(StudentGroup)
+    student_group = ReferenceField(StudentGroup)
 
 
 class SessionPulseStudent(Document):
     session = LazyReferenceField(Session)
     attentiveness = IntField()
     engagement = IntField()
-    student = LazyReferenceField(Student)
+    student = ReferenceField(Student)
 
 
 class BoundingBox(EmbeddedDocument):
