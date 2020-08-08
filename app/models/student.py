@@ -17,4 +17,4 @@ class Guardian(User):
 
 class StudentGroup(Document):
     name = StringField(required=True)
-    members = ListField(LazyReferenceField(Student))
+    members = ListField(ReferenceField(Student))

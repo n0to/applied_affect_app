@@ -3,7 +3,7 @@ from app.models.school import *
 from app.models.session import *
 from app.models.student import *
 from app.models.teacher import *
-from app.models.enum_models import *
+from app.models.enums import *
 from app.db import database
 import random
 from faker import Faker

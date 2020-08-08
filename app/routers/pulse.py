@@ -1,11 +1,14 @@
 from fastapi import APIRouter
+import app.utils.pulse as pulse_utils
+from app.schemas.pulse import SessionAttendanceAggregated
 
 router = APIRouter()
 
 
-@router.get("/session/{id}/attendance")
-def get_session_attendance(id: str):
-    pass
+@router.get("/session/{id}/attendance_aggregated", response_model=SessionAttendanceAggregated)
+def get_session_attendance_aggregated(id: str):
+    session_attendance_aggregated = pulse_utils.get_session_attendance_aggregated(id)
+    return session_attendance_aggregated
 
 
 @router.get("/session/{id}/pulse")

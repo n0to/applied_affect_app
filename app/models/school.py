@@ -24,5 +24,5 @@ class Room(Document):
 class Klass(Document):
     grade = StringField(required=True)
     section = StringField(required=True, unique_with='grade')
-    student_groups = ListField(LazyReferenceField(StudentGroup))
+    student_groups = ListField(ReferenceField(StudentGroup))
     curriculum = StringField()

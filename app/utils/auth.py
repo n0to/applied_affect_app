@@ -4,7 +4,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from app.config import get_settings
 
-from app.core.user_utils import get_user
+from app.utils.user import get_user
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 settings = get_settings()

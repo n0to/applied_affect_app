@@ -3,11 +3,11 @@ from datetime import timedelta
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from app.core.auth_utils import *
+from app.utils.auth import *
 from jose import JWTError, jwt
 
-from app.core.auth_utils import authenticate_user
-from app.core.user_utils import get_user
+from app.utils.auth import authenticate_user
+from app.utils.user import get_user
 from app.schemas.user import User
 from app.schemas.token import Token, TokenData
 from app.config import get_settings

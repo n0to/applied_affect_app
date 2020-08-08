@@ -5,7 +5,7 @@ from mongoengine import EmbeddedDocument, DateTimeField, FloatField, IntField, S
 
 from app.models.school import Room, Klass
 from app.models.teacher import Teacher
-from app.models.enum_models import SessionState, InterventionThresholdsDefaults
+from app.models.enums import SessionState, InterventionThresholdsDefaults
 
 
 class SessionConfiguration(EmbeddedDocument):
