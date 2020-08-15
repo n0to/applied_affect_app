@@ -1,6 +1,8 @@
+from typing import List
+
 from fastapi import APIRouter
 import app.utils.pulse as pulse_utils
-from app.schemas.pulse import SessionAttendanceAggregated
+from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent
 
 router = APIRouter()
 
@@ -11,11 +13,11 @@ def get_session_attendance_aggregated(id: str):
     return session_attendance_aggregated
 
 
-@router.get("/session/{id}/pulse")
+@router.get("/session/{id}/pulse", response_model=List[SessionPulse])
 def get_session_pulse(id: str):
-    pass
+    return pulse_utils.get_session_pulse(id)
 
 
-@router.get("/session/{id}/student_pulse")
+@router.get("/session/{id}/student_pulse", response_model=List[SessionPulseStudent])
 def get_session_student_pulse(id: str):
-    pass
+    return pulse_utils.get_session_pulse_student(id)

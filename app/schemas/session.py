@@ -10,7 +10,7 @@ class SessionConfiguration(BaseModel):
     th_min_student_for_int: Optional[int] = Field(None)
     th_min_gap_bet_int: Optional[int] = Field(None)
     th_min_gap_for_student_int: Optional[int] = Field(None)
-    timestamp: Optional[datetime] = Field(None, description="Description Here")
+    datetime_created: Optional[datetime] = Field(None, description="Description Here")
 
     class Config:
         orm_mode = True
@@ -18,7 +18,7 @@ class SessionConfiguration(BaseModel):
 
 class SessionScenario(BaseModel):
     name: Scenario = Field(None)
-    timestamp: Optional[datetime] = Field(None, description="Description Here")
+    datetime_created: Optional[datetime] = Field(None, description="Description Here")
 
     class Config:
         orm_mode = True

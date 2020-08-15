@@ -1,6 +1,6 @@
 from mongoengine import Document, LazyReferenceField, BooleanField, IntField, EmbeddedDocument, FloatField, \
     EmbeddedDocumentField, DateTimeField, ReferenceField, StringField
-
+import datetime
 from app.models.session import Session
 from app.models.student import Student, StudentGroup
 
@@ -9,22 +9,31 @@ class SessionAttendance(Document):
     session = LazyReferenceField(Session)
     student = LazyReferenceField(Student)
     is_present = BooleanField()
+    datetime_modified = DateTimeField(default=datetime.datetime.now())
+    version = StringField()
 
 
 class SessionPulse(Document):
     session = LazyReferenceField(Session)
     attentiveness = IntField()
     engagement = IntField()
-    student_group = ReferenceField(StudentGroup)
+    student_group = LazyReferenceField(StudentGroup)
+    datetime_modified = DateTimeField(default=datetime.datetime.now())
+    datetime_sequence = DateTimeField(default=datetime.datetime.now())
+    version = StringField()
 
 
 class SessionPulseStudent(Document):
     session = LazyReferenceField(Session)
     attentiveness = IntField()
     engagement = IntField()
-    student = ReferenceField(Student)
+    student = LazyReferenceField(Student)
+    datetime_modified = DateTimeField(default=datetime.datetime.now())
+    datetime_sequence = DateTimeField(default=datetime.datetime.now())
+    version = StringField()
 
 
+'''
 class BoundingBox(EmbeddedDocument):
     x = FloatField(required=True)
     y = FloatField(required=True)
@@ -41,7 +50,7 @@ class FacialAnalysis(EmbeddedDocument):
 
 class SessionPulseStudentRaw(Document):
     frame_id = IntField(required=True)
-    timestamp = DateTimeField(required=True)
+    datetime_modified = DateTimeField(default=datetime.datetime.now)
     session = LazyReferenceField(Session, required=True)
     human_bbox = EmbeddedDocumentField(BoundingBox)
     facial_analysis = EmbeddedDocumentField(FacialAnalysis)
@@ -51,3 +60,4 @@ class SessionPulseStudentRaw(Document):
 
 class SessionIntervention(Document):
     pass
+'''

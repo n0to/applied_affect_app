@@ -6,9 +6,11 @@ import app.utils.pulse as utils_pulse
 import bson
 import app.models.pulse as models_pulse
 import app.models.session as models_session
+import time
 
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
-session_id = '5f269246a24cbc0b2f561d09'
+session_id = '5f32686f9c6348c3225aaaea'
+from fastapi import logger
 
 
 class TestMongo(unittest.TestCase):
@@ -42,3 +44,31 @@ class TestMongo(unittest.TestCase):
     def test_session_pulse_student(self):
         pulse = utils_pulse.get_session_pulse_student(session_id)
         pp.pprint(pulse)
+
+    def test_foo(self):
+        pp.pprint("")
+        start = time.time()
+        pulse_itr = models_pulse.SessionPulse.objects(session=session_id)
+        elapsed = time.time() - start
+        pp.pprint("Elapsed: {}".format(elapsed))
+        start = time.time()
+        pp.pprint(len(pulse_itr))
+        pp.pprint(pulse_itr[0])
+        for pulse in pulse_itr:
+            pp.pprint(pulse.datetime_modified)
+        elapsed = time.time() - start
+        pp.pprint("Elapsed: {}".format(elapsed))
+
+    def test_bar(self):
+        pp.pprint("")
+        start = time.time()
+        pulse_itr = models_pulse.SessionPulseStudent.objects(session=session_id)
+        elapsed = time.time() - start
+        pp.pprint("Elapsed: {}".format(elapsed))
+        start = time.time()
+        pp.pprint(len(pulse_itr))
+        pp.pprint(pulse_itr[0])
+        for pulse in pulse_itr:
+            pp.pprint(str(pulse.student.id))
+        elapsed = time.time() - start
+        pp.pprint("Elapsed: {}".format(elapsed))

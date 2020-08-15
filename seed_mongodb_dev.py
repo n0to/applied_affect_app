@@ -29,16 +29,16 @@ def main():
                            password=settings.mongo_password,
                            host=settings.mongo_host)
     fake = Faker('en_IN')
-    seed_school(db)
-    cameras = seed_camera(db)
-    rooms = seed_room(db, cameras)
-    db.user.delete_many({})
-    students = seed_student(db, fake)
-    teachers = seed_teacher(db, fake)
-    klasses = seed_klass(db, students)
-    sessions = seed_session(db, fake, teachers, klasses, rooms)
+    # seed_school(db)
+    # cameras = seed_camera(db)
+    # rooms = seed_room(db, cameras)
+    # db.user.delete_many({})
+    # students = seed_student(db, fake)
+    # teachers = seed_teacher(db, fake)
+    # klasses = seed_klass(db, students)
+    # sessions = seed_session(db, fake, teachers, klasses, rooms)
     seed_session_attendance(db)
-    database.DbMgr.disconnect()
+    # database.DbMgr.disconnect()
 
 
 def seed_school(db):
@@ -186,31 +186,44 @@ def seed_session(db, fake, teachers, klasses, rooms):
     return sessions
 
 
+def seed_session_pulse_student(session, student, interval):
+    print("Saving session pulse info for {} {}".format(session.id, student.name))
+    for i in range(1, 3600, interval):
+        time = session.actual_start_time + datetime.timedelta(seconds=i)
+        SessionPulseStudent(session=session, student=student, attentiveness=random.randint(70, 100),
+                            engagement=random.randint(70, 100), datetime_modified=time).save()
+
+
+def seed_session_pulse(session, student_group, interval):
+    print("Saving session pulse info for {} {}:".format(session.id, student_group.name))
+    for i in range(1, 3600, interval):
+        time = session.actual_start_time + datetime.timedelta(seconds=i)
+        SessionPulse(session=session, student_group=student_group, attentiveness=random.randint(70, 100),
+                     engagement=random.randint(70, 100), datetime_modified=time).save()
+
+
 def seed_session_attendance(db):
     # Lets to attendance for a session
     db.session_attendance.delete_many({})
     db.session_pulse_student.delete_many({})
     db.session_pulse.delete_many({})
-
     sessions = Session.objects({})
     attendance = [True, False, True]
     for session in sessions:
         klass = session.klass
-        for sg in klass.student_groups:
-            sgf = sg.fetch()
+        for sgf in klass.student_groups:
             if sgf.name == 'all':
                 students = sgf.members
-                for student in students:
-                    stf = student.fetch()
+                for stf in students:
                     print("Saving attendance for student: ", stf.name)
                     SessionAttendance(session=session, student=stf,
                                       is_present=attendance[random.randint(0, 2)]).save()
-                    print("Saving pulse for student: ", stf.name)
-                    SessionPulseStudent(session=session, student=stf, attentiveness=random.randint(70, 100),
-                                        engagement=random.randint(70, 100)).save()
-            print("Saving attendance for student group: ", sgf.name)
-            SessionPulse(session=session, student_group=sgf, attentiveness=random.randint(70, 100),
-                         engagement=random.randint(70, 100)).save()
+                    seed_session_pulse_student(session, stf, 5)
+            seed_session_pulse(session, sgf, 5)
+        session.actual_start_time = session.scheduled_start_time
+        session.actual_end_time = session.scheduled_end_time
+        session.state = SessionState.Ended
+        session.save()
 
 
 main()

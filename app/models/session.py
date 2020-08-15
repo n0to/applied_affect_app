@@ -9,7 +9,7 @@ from app.models.enums import SessionState, InterventionThresholdsDefaults
 
 
 class SessionConfiguration(EmbeddedDocument):
-    timestamp = DateTimeField(default=datetime.datetime.now())
+    datetime_created = DateTimeField(default=datetime.datetime.now())
     # Minimum students in percentage to demonstrate some behavior to trigger class intervention
     th_min_student_for_int = IntField(default=InterventionThresholdsDefaults.MIN_STUDENT_FOR_INT)
     # Minimum time between two interventions. In seconds
@@ -19,7 +19,7 @@ class SessionConfiguration(EmbeddedDocument):
 
 
 class SessionScenario(EmbeddedDocument):
-    timestamp = DateTimeField(default=datetime.datetime.now())
+    datetime_created = DateTimeField(default=datetime.datetime.now())
     name = StringField(required=True)
 
 
@@ -36,5 +36,6 @@ class Session(Document):
     configs = ListField(EmbeddedDocumentField(SessionConfiguration))
     video_url = ListField(URLField())
     state = StringField(default=SessionState.Scheduled)
+    datetime_modified = DateTimeField(default=datetime.datetime.now)
 
 
