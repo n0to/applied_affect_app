@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import APIRouter
 import app.utils.pulse as pulse_utils
 from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent

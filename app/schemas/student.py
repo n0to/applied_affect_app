@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.models.enums import Grade, Curriculum
@@ -29,3 +30,19 @@ class StudentGroup(BaseModel):
     class Config:
         orm_mode = True
 
+
+class StudentAttendanceAggregated(BaseModel):
+    present: int
+    total: int
+
+
+class StudentPulseAggregated(BaseModel):
+    attentiveness: int
+    engagement: int
+
+
+class StudentSessionPulse(BaseModel):
+    attentiveness: int
+    engagement: int
+    scenario: str
+    datetime_sequence: datetime

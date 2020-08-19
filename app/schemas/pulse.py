@@ -46,4 +46,10 @@ class SessionIntervention(BaseModel):
         orm_mode = True
 
 
+class SessionPulseAggregated(BaseModel):
+    session: str
+    engagement: int
+    attentiveness: int
 
+    class Config:
+        orm_mode = True

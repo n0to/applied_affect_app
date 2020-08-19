@@ -14,7 +14,7 @@ def get_session(id: str):
 
 @router.put("/session/{id}")
 def update_session(id: str, session: SessionUpdate):
-    id = session_utils.update_session(id, SessionUpdate)
+    id = session_utils.update_session(id, session)
     return id
 
 
