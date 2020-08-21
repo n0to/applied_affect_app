@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter
 
-from app.schemas.student import Student, StudentAttendanceAggregated, StudentPulseAggregated
+from app.schemas.student import Student, StudentAttendanceAggregated, StudentPulseAggregated, StudentSessionPulse
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ def get_all_students():
 
 
 @router.get("/student/{id}", response_model=Student)
-def get_student():
+def get_student(id: str):
     pass
 
 
@@ -28,17 +28,17 @@ def create_student():
 
 
 @router.get("/student/{id}/attendance", response_model=StudentAttendanceAggregated)
-def get_student_attendance():
+def get_student_attendance(id: str):
     pass
 
 
 @router.get("/student/{id}/pulse", response_model=StudentPulseAggregated)
-def get_student_pulse():
+def get_student_pulse(id: str):
     pass
 
 
 @router.get("/student/{id}/session/{s_id}/pulse", response_model=StudentSessionPulse)
-def get_student_pulse():
+def get_student_pulse(id: str, s_id: str):
     pass
 
 
@@ -48,6 +48,6 @@ def update_guardian():
 
 
 @router.get("/guardian/{id}/students", response_model=List[Student])
-def get_guardian_student():
+def get_guardian_student(id: str):
     pass
 

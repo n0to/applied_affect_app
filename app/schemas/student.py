@@ -6,9 +6,9 @@ from app.schemas.user import User
 
 
 class Student(User):
-    student_id: str
-    grade: Grade
-    curriculum: Curriculum
+    student_id: Optional[str]
+    grade: Optional[Grade]
+    curriculum: Optional[Curriculum]
     is_opt_out_individual: Optional[bool] = Field(None, description="description here")
     is_opt_out_aggregate: Optional[bool] = Field(None, description="description here")
 

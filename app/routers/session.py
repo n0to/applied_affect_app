@@ -10,6 +10,7 @@ def get_session(id: str):
     session = session_utils.get_session(id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    return session
 
 
 @router.put("/session/{id}")

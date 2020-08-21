@@ -3,6 +3,7 @@ from fastapi.logger import logger
 from app.db.database import DbMgr
 from app.routers import session, authentication, student, teacher, pulse, school
 from app.config import get_settings, Settings
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
@@ -13,6 +14,14 @@ app.include_router(teacher.router)
 app.include_router(pulse.router)
 app.include_router(school.router)
 app.include_router(authentication.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
