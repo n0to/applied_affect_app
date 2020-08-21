@@ -31,8 +31,9 @@ class TestMongo(unittest.TestCase):
         sessions = models_session.Session.objects(teacher=teacher_id).order_by('+scheduled_start_time').limit(3)
         out_sessions = []
         for session in sessions:
-            pp.pprint(session.klass.id)
+            pp.pprint(str(session.id))
             out_sessions.append(schemas_session.Session.from_orm(session))
+
         for session in out_sessions:
             pp.pprint(session.dict())
 

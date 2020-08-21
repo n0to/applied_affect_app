@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.utils.auth import *
 from jose import JWTError, jwt
-
+from fastapi.logger import logger
 from app.utils.auth import authenticate_user
 from app.utils.user import get_user
 from app.schemas.user import User
@@ -19,6 +19,7 @@ router = APIRouter()
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    logger.debug("get_current_user")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -39,6 +40,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 def get_current_active_user(current_user: User = Depends(get_current_user)):
+    logger.debug("get_current_active_user")
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
@@ -46,6 +48,7 @@ def get_current_active_user(current_user: User = Depends(get_current_user)):
 
 @router.post("/token", response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    logger.debug("Got username:{}, password:{}".format(form_data.username, form_data.password))
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -61,5 +64,5 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user

@@ -55,6 +55,7 @@ class Session(SessionCreate):
     actual_start_time: Optional[datetime] = Field(None, description="Description Here")
     actual_end_time: Optional[datetime] = Field(None, description="Description Here")
     video_url: Optional[List[str]] = Field(None, description="Description Here")
+    session_id: Optional[str] = None
 
     class Config:
         orm_mode = True

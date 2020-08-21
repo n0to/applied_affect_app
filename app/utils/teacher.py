@@ -8,7 +8,9 @@ def get_teacher_sessions(id: str):
     sessions = models_session.Session.objects(teacher=id).order_by('+scheduled_start_time').limit(3)
     out_sessions = []
     for session in sessions:
-        out_sessions.append(schemas_session.Session.from_orm(session))
+        out = schemas_session.Session.from_orm(session)
+        out.session_id = str(session.id)
+        out_sessions.append(out)
     return out_sessions
 
 

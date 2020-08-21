@@ -38,6 +38,7 @@ pytest==5.4.3
 python-dateutil==2.8.1
 python-dotenv==0.14.0
 python-jose==3.2.0
+python-multipart==0.0.5
 python-slugify==4.0.1
 requests==2.24.0
 rsa==4.6
