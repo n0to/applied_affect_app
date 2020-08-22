@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.logger import logger
+from loguru import logger
 from typing import List
 from app.schemas.pulse import SessionPulse, SessionPulseAggregated
 from app.schemas.session import Session

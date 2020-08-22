@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.logger import logger
+from loguru import logger
 from typing import List
 from app.schemas.student import Student, StudentAttendanceAggregated, StudentPulseAggregated, StudentSessionPulse
 

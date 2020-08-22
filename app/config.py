@@ -1,6 +1,6 @@
 from pydantic import BaseSettings, FilePath
 from functools import lru_cache
-from fastapi.logger import logger
+from loguru import logger
 import os
 
 

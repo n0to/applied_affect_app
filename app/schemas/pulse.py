@@ -21,7 +21,6 @@ class SessionAttendance(BaseModel):
 class SessionPulse(BaseModel):
     datetime_sequence: Optional[datetime]
     student_group: Optional[StudentGroup]
-    student_group_name: str
     attentiveness: int
     engagement: int
 

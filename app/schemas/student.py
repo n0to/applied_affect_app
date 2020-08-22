@@ -25,7 +25,7 @@ class Guardian(User):
 
 class StudentGroup(BaseModel):
     name: str
-    members: Optional[List[Student]]
+    members: Optional[List[Student]] = None
 
     class Config:
         orm_mode = True

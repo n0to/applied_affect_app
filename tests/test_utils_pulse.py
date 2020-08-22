@@ -46,18 +46,9 @@ class TestMongo(unittest.TestCase):
         pp.pprint(pulse)
 
     def test_foo(self):
-        pp.pprint("")
-        start = time.time()
         pulse_itr = models_pulse.SessionPulse.objects(session=session_id)
-        elapsed = time.time() - start
-        pp.pprint("Elapsed: {}".format(elapsed))
-        start = time.time()
-        pp.pprint(len(pulse_itr))
-        pp.pprint(pulse_itr[0])
         for pulse in pulse_itr:
-            pp.pprint(pulse.datetime_modified)
-        elapsed = time.time() - start
-        pp.pprint("Elapsed: {}".format(elapsed))
+            pp.pprint(pulse.student_group.id)
 
     def test_bar(self):
         pp.pprint("")
