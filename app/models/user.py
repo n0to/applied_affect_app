@@ -1,6 +1,11 @@
-import datetime
-
-from mongoengine import Document, StringField, ListField, URLField, EmailField, DateTimeField
+from datetime import datetime
+from mongoengine import (
+    Document,
+    StringField,
+    ListField,
+    URLField,
+    EmailField,
+    DateTimeField)
 
 
 class User(Document):
@@ -8,8 +13,8 @@ class User(Document):
     phone = StringField(max_length=10)
     email = EmailField(unique=True)
     images = ListField(URLField())
-    datetime_modified = DateTimeField(default=datetime.datetime.now)
-    hashed_password = StringField(max_length=20)
+    datetime_modified = DateTimeField(default=datetime.now)
+    hashed_password = StringField(max_length=100)
     meta = {'allow_inheritance': True}
 
 

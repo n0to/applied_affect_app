@@ -1,11 +1,12 @@
-from typing import List
-
 from fastapi import APIRouter
 from fastapi.logger import logger
+from typing import List
 from app.schemas.pulse import SessionPulse, SessionPulseAggregated
 from app.schemas.session import Session
 from app.schemas.teacher import Teacher
 import app.utils.teacher as utils_teacher
+
+
 router = APIRouter()
 
 

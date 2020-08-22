@@ -1,7 +1,8 @@
-from typing import List
 from fastapi import APIRouter
-import app.utils.pulse as pulse_utils
+from fastapi.logger import logger
+from typing import List
 from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent
+import app.utils.pulse as pulse_utils
 
 router = APIRouter()
 

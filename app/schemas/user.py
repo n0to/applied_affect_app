@@ -1,12 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, AnyHttpUrl, Field
 from typing import Optional, List
 
 
 class User(BaseModel):
     name: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
-    images: List[str] = []
+    images: List[AnyHttpUrl] = []
+    disabled: Optional[bool] = Field(False)
 
     class Config:
         orm_mode = True

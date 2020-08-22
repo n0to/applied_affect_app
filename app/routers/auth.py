@@ -1,13 +1,10 @@
-from fastapi import APIRouter
-from datetime import timedelta
-
-from fastapi import Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from app.utils.auth import *
-from jose import JWTError, jwt
 from fastapi.logger import logger
-from app.utils.auth import authenticate_user
-from app.utils.user import get_user
+from jose import JWTError, jwt
+from datetime import timedelta
+from app.utils.auth import *
+from app.utils.user import get_user_by_email, authenticate_user
 from app.schemas.user import User
 from app.schemas.token import Token, TokenData
 from app.config import get_settings
@@ -33,7 +30,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = get_user(email=token_data.email)
+    user = get_user_by_email(email=token_data.email)
     if user is None:
         raise credentials_exception
     return user

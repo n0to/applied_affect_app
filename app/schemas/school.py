@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AnyUrl
 from app.models.enums import Grade, Section, Curriculum
 from typing import List, Optional
 from app.schemas.student import StudentGroup
@@ -15,7 +15,7 @@ class School(BaseModel):
 
 class Camera(BaseModel):
     name: str
-    stream_url: Optional[str]
+    stream_url: Optional[AnyUrl]
     position: Optional[str] = None
 
     class Config:

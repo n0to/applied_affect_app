@@ -1,6 +1,11 @@
-from mongoengine import Document, LazyReferenceField, BooleanField, IntField, EmbeddedDocument, FloatField, \
-    EmbeddedDocumentField, DateTimeField, ReferenceField, StringField
-import datetime
+from datetime import datetime
+from mongoengine import (
+    Document,
+    LazyReferenceField,
+    BooleanField,
+    IntField,
+    DateTimeField,
+    StringField)
 from app.models.session import Session
 from app.models.student import Student, StudentGroup
 
@@ -9,7 +14,7 @@ class SessionAttendance(Document):
     session = LazyReferenceField(Session)
     student = LazyReferenceField(Student)
     is_present = BooleanField()
-    datetime_modified = DateTimeField(default=datetime.datetime.now())
+    datetime_modified = DateTimeField(default=datetime.now())
     version = StringField()
 
 
@@ -18,8 +23,8 @@ class SessionPulse(Document):
     attentiveness = IntField()
     engagement = IntField()
     student_group = LazyReferenceField(StudentGroup)
-    datetime_modified = DateTimeField(default=datetime.datetime.now())
-    datetime_sequence = DateTimeField(default=datetime.datetime.now())
+    datetime_modified = DateTimeField(default=datetime.now())
+    datetime_sequence = DateTimeField(default=datetime.now())
     version = StringField()
 
 
@@ -28,8 +33,8 @@ class SessionPulseStudent(Document):
     attentiveness = IntField()
     engagement = IntField()
     student = LazyReferenceField(Student)
-    datetime_modified = DateTimeField(default=datetime.datetime.now())
-    datetime_sequence = DateTimeField(default=datetime.datetime.now())
+    datetime_modified = DateTimeField(default=datetime.now())
+    datetime_sequence = DateTimeField(default=datetime.now())
     version = StringField()
 
 

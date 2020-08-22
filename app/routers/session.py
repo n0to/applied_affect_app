@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.logger import logger
 from app.schemas.session import Session, SessionCreate, SessionUpdate
 import app.utils.session as session_utils
 

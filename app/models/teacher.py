@@ -1,5 +1,4 @@
 from mongoengine import StringField
-
 from app.models.user import User
 
 

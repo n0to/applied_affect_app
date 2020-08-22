@@ -1,15 +1,23 @@
-import datetime
-
-from mongoengine import EmbeddedDocument, DateTimeField, FloatField, IntField, StringField, Document, \
-    LazyReferenceField, ListField, EmbeddedDocumentField, URLField, ReferenceField
-
+from datetime import datetime
+from mongoengine import (
+    EmbeddedDocument,
+    DateTimeField,
+    FloatField,
+    IntField,
+    StringField,
+    Document,
+    LazyReferenceField,
+    ListField,
+    EmbeddedDocumentField,
+    URLField,
+    ReferenceField)
 from app.models.school import Room, Klass
 from app.models.teacher import Teacher
 from app.models.enums import SessionState, InterventionThresholdsDefaults
 
 
 class SessionConfiguration(EmbeddedDocument):
-    datetime_created = DateTimeField(default=datetime.datetime.now())
+    datetime_created = DateTimeField(default=datetime.now())
     # Minimum students in percentage to demonstrate some behavior to trigger class intervention
     th_min_student_for_int = IntField(default=InterventionThresholdsDefaults.MIN_STUDENT_FOR_INT)
     # Minimum time between two interventions. In seconds
@@ -19,7 +27,7 @@ class SessionConfiguration(EmbeddedDocument):
 
 
 class SessionScenario(EmbeddedDocument):
-    datetime_created = DateTimeField(default=datetime.datetime.now())
+    datetime_created = DateTimeField(default=datetime.now())
     name = StringField(required=True)
 
 
@@ -36,6 +44,6 @@ class Session(Document):
     configs = ListField(EmbeddedDocumentField(SessionConfiguration))
     video_url = ListField(URLField())
     state = StringField(default=SessionState.Scheduled)
-    datetime_modified = DateTimeField(default=datetime.datetime.now)
+    datetime_modified = DateTimeField(default=datetime.now)
 
 
