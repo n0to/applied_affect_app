@@ -68,5 +68,5 @@ def info(settings: Settings = Depends(get_settings)):
         "logging_level": settings.logging_level,
         "algorithm": settings.algorithm,
         "mongodb_url": settings.mongo_host,
-        "access_token_expire_minutes": settings.access_token_expire_minutes
+        "access_token_expire_minutes": settings.access_token_expire_seconds
     }

@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-
 from mongoengine import DoesNotExist
 from loguru import logger
 import app.schemas.pulse as schemas_pulse
@@ -34,7 +33,12 @@ def get_session_pulse(id: str, from_datetime: Optional[datetime] = None, to_date
         for sg in student_groups:
             student_groups_hash[str(sg.id)] = sg.name
         logger.debug("Start fetching from Mongo")
-        session_pulse_itr = models_pulse.SessionPulse.objects(session=id)
+        if from_datetime is not None and to_datetime is not None:
+            session_pulse_itr = models_pulse.SessionPulse.objects(session=id,
+                                                                  datetime_sequence__lte=to_datetime,
+                                                                  datetime_sequence__gte=from_datetime)
+        else:
+            session_pulse_itr = models_pulse.SessionPulse.objects(session=id)
         logger.debug("Finished fetching from Mongo")
         for sess_pulse in session_pulse_itr:
             sg = schemas_student.StudentGroup(name=student_groups_hash[str(sess_pulse.student_group.id)])
@@ -52,9 +56,19 @@ def get_session_pulse(id: str, from_datetime: Optional[datetime] = None, to_date
 def get_session_pulse_student(id: str):
     pulse = []
     try:
+        #student_hash = {}
+        #student_groups = models_session.Session.objects.get(id=id).klass.student_groups
+        #for sg in student_groups:
+        #    if sg.name == "all":
+        #        for student in sg.members:
+        #            student_hash[str(student.id)] = student.student_id
+        #        break
         session_pulse_itr = models_pulse.SessionPulseStudent.objects(session=id)
         for sess_pulse in session_pulse_itr:
-            p = schemas_pulse.SessionPulseStudent.from_orm(sess_pulse)
+            p = schemas_pulse.SessionPulseStudent(datetime_sequence=sess_pulse.datetime_sequence,
+                                                  attentiveness=sess_pulse.attentiveness,
+                                                  engagement=sess_pulse.engagement,
+                                                  student_id = str(sess_pulse.student.id))
             pulse.append(p)
     except DoesNotExist:
         pulse = []

@@ -32,4 +32,4 @@ class Settings(BaseSettings):
     mongo_host: str
     secret_key: str
     algorithm: str
-    access_token_expire_minutes: int
+    access_token_expire_seconds: int

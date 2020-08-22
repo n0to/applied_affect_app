@@ -31,7 +31,7 @@ class SessionPulse(BaseModel):
 class SessionPulseStudent(BaseModel):
     datetime_sequence: Optional[datetime]
     student: Optional[Student]
-    student_id: str
+    student_id: Optional[str]
     attentiveness: int
     engagement: int
 

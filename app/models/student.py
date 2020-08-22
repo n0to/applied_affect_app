@@ -1,13 +1,13 @@
 from datetime import datetime
+
 from mongoengine import (
     Document,
     StringField,
     ListField,
-    URLField,
     BooleanField,
     ReferenceField,
-    LazyReferenceField,
     DateTimeField)
+
 from app.models.user import User
 
 

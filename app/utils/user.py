@@ -1,3 +1,4 @@
+from mongoengine import DoesNotExist
 from pydantic import EmailStr
 import app.models.user as models_user
 import app.schemas.user as schemas_user
@@ -5,7 +6,10 @@ from app.utils.auth import verify_password
 
 
 def get_user_by_email(email: EmailStr):
-    user = models_user.User.objects(email=email).first()
+    try:
+        user = models_user.User.objects(email=email).first()
+    except DoesNotExist:
+        pass
     return schemas_user.UserInDB.from_orm(user)
 
 
