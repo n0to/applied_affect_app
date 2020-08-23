@@ -33,6 +33,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     user = get_user_by_email(email=token_data.email)
     if user is None:
         raise credentials_exception
+    logger.debug("current user is: {}".format(user.dict()))
     return user
 
 

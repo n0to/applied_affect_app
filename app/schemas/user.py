@@ -8,6 +8,7 @@ class User(BaseModel):
     phone: Optional[str] = None
     images: List[AnyHttpUrl] = []
     disabled: Optional[bool] = Field(False)
+    role: str = Field(alias='_cls')
 
     class Config:
         orm_mode = True
