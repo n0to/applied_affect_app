@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
-from app.schemas.student import Student, StudentGroup
+
+from pydantic import BaseModel, Field
+
+from app.schemas.mongo_helpers import ObjectIdStr, LazyReferenceStr
+from app.schemas.student import Student
 
 
 class SessionAttendanceAggregated(BaseModel):
@@ -20,7 +23,7 @@ class SessionAttendance(BaseModel):
 
 class SessionPulse(BaseModel):
     datetime_sequence: Optional[datetime]
-    student_group: Optional[StudentGroup]
+    student_group_name: str
     attentiveness: int
     engagement: int
 
@@ -30,8 +33,7 @@ class SessionPulse(BaseModel):
 
 class SessionPulseStudent(BaseModel):
     datetime_sequence: Optional[datetime]
-    student: Optional[Student]
-    student_id: Optional[str]
+    student_id: LazyReferenceStr = Field(alias='student')
     attentiveness: int
     engagement: int
 
@@ -46,7 +48,6 @@ class SessionIntervention(BaseModel):
 
 
 class SessionPulseAggregated(BaseModel):
-    session: str
     engagement: int
     attentiveness: int
 

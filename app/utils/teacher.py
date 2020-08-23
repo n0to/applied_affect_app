@@ -9,7 +9,6 @@ def get_teacher_sessions(id: str):
     out_sessions = []
     for session in sessions:
         out = schemas_session.Session.from_orm(session)
-        out.session_id = str(session.id)
         out_sessions.append(out)
     return out_sessions
 

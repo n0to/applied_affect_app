@@ -7,3 +7,8 @@ conda activate aa
 pip install -r requirements.txt
 # Launch the service
 ./run.sh
+
+
+# Sample Teacher
+username: latashahenry36@indus.com
+password: foobar

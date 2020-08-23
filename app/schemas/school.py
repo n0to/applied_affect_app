@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field, AnyUrl
+from pydantic import AnyUrl
 from app.models.enums import Grade, Section, Curriculum
 from typing import List, Optional
-from app.schemas.student import StudentGroup
+from app.schemas.mongo_helpers import ObjectIdStr
+from app.schemas.student import StudentGroup, Student
+from pydantic import BaseModel
 
 
 class School(BaseModel):
+    id: ObjectIdStr
     name: str
     group_name: str
     location: str
@@ -14,15 +17,18 @@ class School(BaseModel):
 
 
 class Camera(BaseModel):
+    id: ObjectIdStr
     name: str
     stream_url: Optional[AnyUrl]
     position: Optional[str] = None
 
     class Config:
         orm_mode = True
+        arbitrary_types_allowed = True
 
 
 class Room(BaseModel):
+    id: ObjectIdStr
     name: str
     cameras: List[Camera]
 
@@ -30,19 +36,19 @@ class Room(BaseModel):
         orm_mode = True
 
 
-class Klass(BaseModel):
+class KlassWithoutStudentList(BaseModel):
+    id: ObjectIdStr
     grade: Grade
     section: Section
     curriculum: Curriculum
-    student_groups: List[StudentGroup]
 
     class Config:
         orm_mode = True
 
 
+class Klass(KlassWithoutStudentList):
+    student_groups: Optional[List[StudentGroup]] = []
+    members: List[Student]
 
-
-
-
-
-
+    class Config:
+        orm_mode = True

@@ -2,11 +2,12 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.models.enums import Grade, Curriculum
+from app.schemas.mongo_helpers import ObjectIdStr
 from app.schemas.user import User
 
 
 class Student(User):
-    student_id: str
+    school_id: str
     grade: Optional[Grade]
     curriculum: Optional[Curriculum]
     is_opt_out_individual: Optional[bool] = Field(None, description="description here")
@@ -25,7 +26,7 @@ class Guardian(User):
 
 class StudentGroup(BaseModel):
     name: str
-    members: Optional[List[Student]] = None
+    members: List[Student]
 
     class Config:
         orm_mode = True

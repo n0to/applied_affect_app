@@ -6,13 +6,14 @@ from mongoengine import (
     ListField,
     BooleanField,
     ReferenceField,
-    DateTimeField)
+    DateTimeField,
+    EmbeddedDocument)
 
 from app.models.user import User
 
 
 class Student(User):
-    student_id = StringField(max_length=10)
+    school_id = StringField(max_length=10)
     grade = StringField()
     curriculum = StringField()
     is_opt_out_individual = BooleanField(default=False)
@@ -23,7 +24,7 @@ class Guardian(User):
     students = ListField(ReferenceField(Student))
 
 
-class StudentGroup(Document):
+class StudentGroup(EmbeddedDocument):
     name = StringField(required=True)
     members = ListField(ReferenceField(Student))
     datetime_modified = DateTimeField(default=datetime.now)

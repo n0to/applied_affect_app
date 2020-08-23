@@ -18,3 +18,6 @@ class User(Document):
     meta = {'allow_inheritance': True}
 
 
+class Admin(User):
+    pass
+

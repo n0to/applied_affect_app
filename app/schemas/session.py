@@ -2,7 +2,8 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from app.models.enums import Scenario, Subject, SessionState
-from app.schemas.school import Klass, Room
+from app.schemas.mongo_helpers import ObjectIdStr
+from app.schemas.school import Klass, Room, KlassWithoutStudentList
 from app.schemas.teacher import Teacher
 
 
@@ -25,7 +26,7 @@ class SessionScenario(BaseModel):
 
 
 class SessionCreate(BaseModel):
-    klass: Klass
+    klass: KlassWithoutStudentList
     room: Room
     subject: Subject
     teacher: Teacher
@@ -55,9 +56,7 @@ class Session(SessionCreate):
     actual_start_time: Optional[datetime] = Field(None, description="Description Here")
     actual_end_time: Optional[datetime] = Field(None, description="Description Here")
     video_url: Optional[List[str]] = Field(None, description="Description Here")
-    session_id: Optional[str] = None
+    id: ObjectIdStr
 
     class Config:
         orm_mode = True
-
-

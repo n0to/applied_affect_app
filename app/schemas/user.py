@@ -1,11 +1,13 @@
-from pydantic import BaseModel, EmailStr, AnyHttpUrl, Field
 from typing import Optional, List
+from pydantic import BaseModel, EmailStr, AnyHttpUrl, Field
+from app.schemas.mongo_helpers import ObjectIdStr
 
 
 class User(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
+    id: ObjectIdStr
+    name: str
+    email: EmailStr
+    phone: str
     images: List[AnyHttpUrl] = []
     disabled: Optional[bool] = Field(False)
     role: str = Field(alias='_cls')

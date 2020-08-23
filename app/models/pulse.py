@@ -22,7 +22,7 @@ class SessionPulse(Document):
     session = LazyReferenceField(Session)
     attentiveness = IntField()
     engagement = IntField()
-    student_group = LazyReferenceField(StudentGroup)
+    student_group_name = StringField()
     datetime_modified = DateTimeField(default=datetime.now())
     datetime_sequence = DateTimeField(default=datetime.now())
     version = StringField()

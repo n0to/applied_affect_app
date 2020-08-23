@@ -8,67 +8,40 @@ import app.models.session as models_session
 import app.schemas.student as schemas_student
 
 
-def get_session_attendance_aggregated(id: str):
-    sat_agg = None
+def get_session_attendance_aggregated(session_id: str):
     try:
-        student_groups = models_session.Session.objects.get(id=id).klass.student_groups
-        total = None
-        for sg in student_groups:
-            if sg.name == "all":
-                total = len(sg.members)
-                break
-        present = models_pulse.SessionAttendance.objects(session=id, is_present=True).count()
+        present = models_pulse.SessionAttendance.objects(session=session_id, is_present=True).count()
+        total = len(models_session.Session.objects.get(id=session_id).klass.members)
         sat_agg = schemas_pulse.SessionAttendanceAggregated(total=total, present=present)
     except DoesNotExist:
         sat_agg = None
     return sat_agg
 
 
-def get_session_pulse(id: str, from_datetime: Optional[datetime] = None, to_datetime: Optional[datetime] = None):
-    logger.debug("Get pulse for session:{} from:{} to {}".format(id, from_datetime, to_datetime))
+def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None, to_datetime: Optional[datetime] = None):
+    logger.debug("Get pulse for session:{} from:{} to {}".format(session_id, from_datetime, to_datetime))
     pulse = []
     try:
-        student_groups_hash = {}
-        student_groups = models_session.Session.objects.get(id=id).klass.student_groups
-        for sg in student_groups:
-            student_groups_hash[str(sg.id)] = sg.name
-        logger.debug("Start fetching from Mongo")
         if from_datetime is not None and to_datetime is not None:
-            session_pulse_itr = models_pulse.SessionPulse.objects(session=id,
+            session_pulse_itr = models_pulse.SessionPulse.objects(session=session_id,
                                                                   datetime_sequence__lte=to_datetime,
                                                                   datetime_sequence__gte=from_datetime)
         else:
-            session_pulse_itr = models_pulse.SessionPulse.objects(session=id)
-        logger.debug("Finished fetching from Mongo")
+            session_pulse_itr = models_pulse.SessionPulse.objects(session=session_id)
         for sess_pulse in session_pulse_itr:
-            sg = schemas_student.StudentGroup(name=student_groups_hash[str(sess_pulse.student_group.id)])
-            p = schemas_pulse.SessionPulse(datetime_sequence=sess_pulse.datetime_sequence,
-                                           student_group=sg,
-                                           attentiveness=sess_pulse.attentiveness,
-                                           engagement=sess_pulse.engagement)
+            p = schemas_pulse.SessionPulse.from_orm(sess_pulse)
             pulse.append(p)
-        logger.debug("Finished de-marshaling")
     except DoesNotExist:
         pulse = []
     return pulse
 
 
-def get_session_pulse_student(id: str):
+def get_session_pulse_student(session_id: str):
     pulse = []
     try:
-        #student_hash = {}
-        #student_groups = models_session.Session.objects.get(id=id).klass.student_groups
-        #for sg in student_groups:
-        #    if sg.name == "all":
-        #        for student in sg.members:
-        #            student_hash[str(student.id)] = student.student_id
-        #        break
-        session_pulse_itr = models_pulse.SessionPulseStudent.objects(session=id)
+        session_pulse_itr = models_pulse.SessionPulseStudent.objects.no_dereference()(session=session_id)
         for sess_pulse in session_pulse_itr:
-            p = schemas_pulse.SessionPulseStudent(datetime_sequence=sess_pulse.datetime_sequence,
-                                                  attentiveness=sess_pulse.attentiveness,
-                                                  engagement=sess_pulse.engagement,
-                                                  student_id = str(sess_pulse.student.id))
+            p = schemas_pulse.SessionPulseStudent.from_orm(sess_pulse)
             pulse.append(p)
     except DoesNotExist:
         pulse = []

@@ -3,7 +3,7 @@ from app.models.user import User
 
 
 class Teacher(User):
-    teacher_id = StringField(max_length=10)
+    school_id = StringField(max_length=10)
 
 
 class SchoolAdmin(User):
