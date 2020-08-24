@@ -20,6 +20,7 @@ def get_teacher(id: str):
     teacher = utils_teacher.get_teacher(id)
     if not teacher:
         raise HTTPException(status_code=400, detail="No such teacher exists")
+    return teacher
 
 
 @router.get("/teacher/{id}/sessions", response_model=List[Session])
@@ -27,6 +28,7 @@ def get_teacher_session(id: str):
     sessions = utils_teacher.get_teacher_sessions(id)
     if not len(sessions):
         raise HTTPException(status_code=400, detail="No sessions for given teacher")
+    return sessions
 
 
 @router.get("/teacher/{id}/session/{s_id}/pulse", response_model=List[SessionPulse])
