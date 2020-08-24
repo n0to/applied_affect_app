@@ -1,9 +1,10 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
-from loguru import logger
 from typing import List, Optional
-from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent
+
+from fastapi import APIRouter, HTTPException
+
 import app.utils.pulse as pulse_utils
+from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent
 
 router = APIRouter()
 

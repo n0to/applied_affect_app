@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Optional
+
 from mongoengine import DoesNotExist
 from loguru import logger
 import app.models.session as models_session
@@ -6,11 +9,13 @@ import app.schemas.session as schemas_session
 import app.schemas.teacher as schemas_teacher
 
 
-def get_teacher_sessions(id: str):
-    logger.debug("Getting sessions for teacher with id: {}".format(id))
+def get_teacher_sessions(id: str, start_datetime: Optional[datetime] = datetime.now(), max_records: Optional[int] = 3):
+    logger.debug("Getting sessions for teacher with id: {}: start_time {} max {}".format(id, start_datetime, max))
     out_sessions = []
     try:
-        sessions = models_session.Session.objects(teacher=id).order_by('+scheduled_start_time').limit(3)
+        sessions = models_session.Session.objects(teacher=id,
+                                                  scheduled_start_time__gt=start_datetime)\
+                                                  .order_by('+scheduled_start_time').limit(max)
         for session in sessions:
             out = schemas_session.Session.from_orm(session)
             out_sessions.append(out)

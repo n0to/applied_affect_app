@@ -8,10 +8,12 @@ import app.models.teacher as models_teacher
 import app.schemas.session as schemas_session
 import app.utils.user as utils_user
 import app.utils.auth as utils_auth
+import app.utils.teacher as utils_teacher
+from datetime import datetime, timedelta
 
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 session_id = '5f269246a24cbc0b2f561d09'
-teacher_id = '5f32686f9c6348c3225aaae0'
+teacher_id = '5f427f3c293d7b69b5716d1a'
 
 
 class TestMongo(unittest.TestCase):
@@ -39,6 +41,16 @@ class TestMongo(unittest.TestCase):
 
         for session in out_sessions:
             pp.pprint(session.dict())
+
+    def test_get_teacher_sessions(self):
+        now = datetime.now()
+        delta = timedelta(days=20)
+        test_time = now - delta
+        sessions = utils_teacher.get_teacher_sessions(id=teacher_id, max_records=8, start_datetime=test_time)
+        for session in sessions:
+            pp.pprint(session.scheduled_start_time.isoformat())
+            pp.pprint(session.subject)
+            pp.pprint(str(session.id))
 
     def test_set_user_password(self):
         hashed_password = utils_auth.get_password_hash("foobar")
