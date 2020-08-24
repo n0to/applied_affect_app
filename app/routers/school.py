@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from loguru import logger
 
 from app.schemas.school import Camera
@@ -8,4 +8,9 @@ router = APIRouter()
 
 @router.get("/camera/{id}", response_model=Camera)
 def get_camera(id: str):
-    return utils_school.get_camera(id)
+    camera = utils_school.get_camera(id)
+    if not Camera:
+        raise HTTPException(status_code=400, detail="No camera found")
+    return camera
+
+

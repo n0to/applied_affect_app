@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from loguru import logger
 from typing import List
 from app.schemas.pulse import SessionPulse, SessionPulseAggregated
@@ -17,13 +17,16 @@ def get_all_teachers():
 
 @router.get("/teacher/{id}", response_model=Teacher)
 def get_teacher(id: str):
-    return utils_teacher.get_teacher(id)
+    teacher = utils_teacher.get_teacher(id)
+    if not teacher:
+        raise HTTPException(status_code=400, detail="No such teacher exists")
 
 
 @router.get("/teacher/{id}/sessions", response_model=List[Session])
 def get_teacher_session(id: str):
-    logger.debug("Getting sessions for teacher id: {}".format(id))
-    return utils_teacher.get_teacher_sessions(id)
+    sessions = utils_teacher.get_teacher_sessions(id)
+    if not len(sessions):
+        raise HTTPException(status_code=400, detail="No sessions for given teacher")
 
 
 @router.get("/teacher/{id}/session/{s_id}/pulse", response_model=List[SessionPulse])

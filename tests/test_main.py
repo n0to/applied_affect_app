@@ -1,10 +1,8 @@
+import pprint
 from fastapi.testclient import TestClient
 from app.main import app
-import pprint
-import logging
-import sys
 
-
+client = TestClient(app)
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 
 

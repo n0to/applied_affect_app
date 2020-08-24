@@ -40,7 +40,7 @@ def configure_logger():
         uvicorn_logger.handlers = []
     logging.getLogger("uvicorn").handlers = [InterceptHandler()]
     logger.configure(
-        handlers=[{"sink": sys.stdout, "level": settings.logging_level, "format": format_record}]
+        handlers=[{"sink": sys.stdout, "level": settings.logging_level, "format": format_record, "colorize": True}]
     )
 
 

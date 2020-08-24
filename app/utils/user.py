@@ -9,9 +9,9 @@ from loguru import logger
 def get_user_by_email(email: EmailStr):
     try:
         user = models_user.User.objects(email=email).first()
-        logger.debug("User is {}".format(user.to_mongo()))
     except DoesNotExist:
-        pass
+        logger.info("No user exist with email {}".format(email))
+        return None
     return schemas_user.UserInDB.from_orm(user)
 
 
@@ -26,5 +26,6 @@ def authenticate_user(email: EmailStr, password: str):
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
+        logger.info("Incorrect Password for username: {}".format(email))
         return False
     return user

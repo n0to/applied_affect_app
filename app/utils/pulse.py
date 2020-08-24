@@ -1,21 +1,24 @@
 from datetime import datetime
 from typing import Optional
-from mongoengine import DoesNotExist
+
 from loguru import logger
-import app.schemas.pulse as schemas_pulse
+from mongoengine import DoesNotExist
+
 import app.models.pulse as models_pulse
 import app.models.session as models_session
-import app.schemas.student as schemas_student
+import app.schemas.pulse as schemas_pulse
 
 
 def get_session_attendance_aggregated(session_id: str):
+    logger.debug("Get session attendance for session {}".format(session_id))
+    session_attendance_agg = None
     try:
         present = models_pulse.SessionAttendance.objects(session=session_id, is_present=True).count()
         total = len(models_session.Session.objects.get(id=session_id).klass.members)
-        sat_agg = schemas_pulse.SessionAttendanceAggregated(total=total, present=present)
+        session_attendance_agg = schemas_pulse.SessionAttendanceAggregated(total=total, present=present)
     except DoesNotExist:
-        sat_agg = None
-    return sat_agg
+        logger.info("No session exists with id:{}".format(session_id))
+    return session_attendance_agg
 
 
 def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None, to_datetime: Optional[datetime] = None):
@@ -32,11 +35,12 @@ def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None,
             p = schemas_pulse.SessionPulse.from_orm(sess_pulse)
             pulse.append(p)
     except DoesNotExist:
-        pulse = []
+        logger.info("No pulse or session exists for session_id: {}".format(session_id))
     return pulse
 
 
 def get_session_pulse_student(session_id: str):
+    logger.debug("Get pulse at student level for session_id: {}".format(session_id))
     pulse = []
     try:
         session_pulse_itr = models_pulse.SessionPulseStudent.objects.no_dereference()(session=session_id)
@@ -44,5 +48,5 @@ def get_session_pulse_student(session_id: str):
             p = schemas_pulse.SessionPulseStudent.from_orm(sess_pulse)
             pulse.append(p)
     except DoesNotExist:
-        pulse = []
+        logger.info("No pulse at student level exists for session_id: {}".format(session_id))
     return pulse
