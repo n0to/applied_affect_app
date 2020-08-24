@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/session/{id}", response_model=Session)
 def get_session(id: str):
-    session = session_utils.get_session(id)
+    session = session_utils.get_session(id=id)
     if not Session:
         raise HTTPException(status_code=404, detail="Session not found")
     return session

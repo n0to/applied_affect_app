@@ -60,3 +60,7 @@ class Session(SessionCreate):
 
     class Config:
         orm_mode = True
+
+
+class SessionList(BaseModel):
+    sessions: List[Session]
