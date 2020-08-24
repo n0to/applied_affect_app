@@ -10,12 +10,12 @@ import app.schemas.teacher as schemas_teacher
 
 
 def get_teacher_sessions(id: str, start_datetime: Optional[datetime] = datetime.now(), max_records: Optional[int] = 3):
-    logger.debug("Getting sessions for teacher with id: {}: start_time {} max {}".format(id, start_datetime, max))
+    logger.debug("Getting sessions for teacher with id: {}: start_time {} max {}".format(id, start_datetime, max_records))
     out_sessions = []
     try:
         sessions = models_session.Session.objects(teacher=id,
                                                   scheduled_start_time__gt=start_datetime)\
-                                                  .order_by('+scheduled_start_time').limit(max)
+                                                  .order_by('+scheduled_start_time').limit(max_records)
         for session in sessions:
             out = schemas_session.Session.from_orm(session)
             out_sessions.append(out)

@@ -20,7 +20,7 @@ def get_teacher(id: str):
 
 
 @router.get("/teacher/{id}/sessions", response_model=List[Session])
-def get_teacher_session(id: str, start_datetime: Optional[datetime], max_records: Optional[int]):
+def get_teacher_session(id: str, start_datetime: Optional[datetime] = datetime.now(), max_records: Optional[int] = 3):
     sessions = utils_teacher.get_teacher_sessions(id=id, start_datetime=start_datetime, max_records=max_records)
     if not len(sessions):
         raise HTTPException(status_code=400, detail="No sessions for given teacher")
