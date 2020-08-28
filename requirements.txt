@@ -10,7 +10,7 @@ click==7.1.2
 cookiecutter==1.7.2
 cryptography==3.0
 devtools==0.6
-dnspython==2.0.0
+dnspython==1.16.0
 ecdsa==0.15
 email-validator==1.1.1
 Faker==4.1.2

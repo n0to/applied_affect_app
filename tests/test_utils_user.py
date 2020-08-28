@@ -42,16 +42,6 @@ class TestMongo(unittest.TestCase):
         for session in out_sessions:
             pp.pprint(session.dict())
 
-    def test_get_teacher_sessions(self):
-        now = datetime.now()
-        delta = timedelta(days=20)
-        test_time = now - delta
-        sessions = utils_teacher.get_teacher_sessions(id=teacher_id, max_records=8, start_datetime=test_time)
-        for session in sessions:
-            pp.pprint(session.scheduled_start_time.isoformat())
-            pp.pprint(session.subject)
-            pp.pprint(str(session.id))
-
     def test_set_user_password(self):
         hashed_password = utils_auth.get_password_hash("foobar")
         utils_user.set_user_password(teacher_id, hashed_password)

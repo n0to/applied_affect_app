@@ -209,8 +209,8 @@ def seed_session(db, fake, teachers, klasses, rooms):
         teacher = teachers[random.randint(0, len(teachers) - 1)]
         room = rooms[random.randint(0, len(rooms) - 1)]
         subject = subjects[random.randint(0, len(subjects) - 1)].name
-        s_config = SessionConfiguration()
-        s_scenario = SessionScenario(name=Scenario.Lecture.name)
+        s_config = SessionConfiguration(datetime_created=st_time)
+        s_scenario = SessionScenario(name=Scenario.Lecture.name, datetime_created=st_time)
         session = Session(klass=klass,
                           room=room,
                           teacher=teacher,
@@ -303,8 +303,8 @@ def seed_future_classes(db, fake):
             teacher = teachers[random.randint(0, len(teachers) - 1)]
             room = rooms[random.randint(0, len(rooms) - 1)]
             subject = subjects[random.randint(0, len(subjects) - 1)].name
-            s_config = SessionConfiguration()
-            s_scenario = SessionScenario(name=Scenario.Lecture.name)
+            s_config = SessionConfiguration(datetime_created=st_time)
+            s_scenario = SessionScenario(name=Scenario.Lecture.name, datetime_created=st_time)
             session = Session(klass=klass,
                               room=room,
                               teacher=teacher,

@@ -7,12 +7,13 @@ from loguru import logger
 
 
 def get_user_by_email(email: EmailStr):
+    out_user = None
     try:
         user = models_user.User.objects(email=email).first()
+        out_user = schemas_user.UserInDB.from_orm(user)
     except DoesNotExist:
         logger.info("No user exist with email {}".format(email))
-        return None
-    return schemas_user.UserInDB.from_orm(user)
+    return out_user
 
 
 def set_user_password(id: str, hashed_password: str):

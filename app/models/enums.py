@@ -5,7 +5,7 @@ class SessionState(str, Enum):
     Scheduled = "Scheduled",
     Started = "Started",
     Ended = "Ended",
-    Cancelled = "Cancelled"
+    Cancelled = "Cancelled",
     Paused = "Paused"
 
 
@@ -18,7 +18,7 @@ class InterventionThresholdsDefaults(int, Enum):
 class Scenario(str, Enum):
     Lecture = "Lecture",
     Quiz = "Quiz",
-    Multimedia = "Multimedia"
+    Multimedia = "Multimedia",
     Group_Discussion = "Group Discussion"
 
 
