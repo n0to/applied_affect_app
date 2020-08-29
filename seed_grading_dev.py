@@ -22,8 +22,9 @@ klasses = []
 grade = Grade.Sixth
 curriculum = Curriculum.IB
 sections = [Section.A, Section.B]
-subj_data = None
-subj_data = None
+subj_data = {}
+obj_data = {}
+
 
 def main():
     conf = os.path.dirname(os.path.realpath(__file__)) + "/app/dev.env"
@@ -50,7 +51,7 @@ def main():
     with open(r'obj_quest.yaml') as file:
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
-        subj_data = load(file, Loader=FullLoader)
+        obj_data = load(file, Loader=FullLoader)
         for k, v in obj_data.items():
             print(k, v)
 
