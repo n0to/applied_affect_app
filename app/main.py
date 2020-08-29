@@ -6,7 +6,7 @@ from loguru import logger
 from app.config import get_settings, Settings
 from app.custom_logging import InterceptHandler, format_record
 from app.db.database import DbMgr
-from app.routers import session, auth, student, teacher, pulse, school
+from app.routers import session, auth, student, teacher, pulse, school, grading
 
 
 def create_app() -> FastAPI:
@@ -18,6 +18,7 @@ def create_app() -> FastAPI:
     app.include_router(pulse.router)
     app.include_router(school.router)
     app.include_router(auth.router)
+    app.include_router(grading.router)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
