@@ -29,4 +29,4 @@ class LazyReferenceStr(str):
         elif isinstance(v, str):
             return v
         else:
-            raise ValueError("Invalid LazyReferenceStr")
+            raise ValueError("Invalid LazyReference")

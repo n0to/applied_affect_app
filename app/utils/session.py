@@ -41,11 +41,7 @@ def search_sessions(max_records: PositiveInt, **kwargs):
                 filters[k] = v
     logger.debug("Max Records: {}".format(max_records))
     logger.bind(payload=filters).debug("session search filters:")
-    for k, v in filters.items():
-        logger.debug("{} -> {}".format(k, v))
     logger.bind(payload=filters).debug("klass search filters:")
-    for k, v in filters_klass.items():
-        logger.debug("{} -> {}".format(k, v))
     out_sessions = []
     try:
         # Get the klasses if the grade and section filters are populated

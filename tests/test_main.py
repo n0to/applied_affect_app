@@ -16,4 +16,3 @@ def test_camera():
     response = client.get("/camera/5f32686b9c6348c3225aaab6")
     pp.pprint(response.__dict__)
 
-

@@ -15,6 +15,7 @@ import pprint
 
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 password = '$2b$12$lqco3yl48gjsr4Qk2T7s1.i1X//G0w.eTQE3T.5m0RwK8/1HjPUcG'
+subjects = [Subject.Civics, Subject.Biology, Subject.Chemistry]
 
 
 def main():
@@ -31,17 +32,17 @@ def main():
                            password=settings.mongo_password,
                            host=settings.mongo_host)
     fake = Faker('en_IN')
-    #seed_school(db)
-    #cameras = seed_camera(db)
-    #rooms = seed_room(db, cameras)
-    #db.user.delete_many({})
-    #students = seed_student(db, fake)
-    #teachers = seed_teacher(db, fake)
-    #seed_school_admin(db, fake)
-    #seed_admin()
-    #klasses = seed_klass(db, students)
-    #sessions = seed_session(db, fake, teachers, klasses, rooms)
-    #seed_session_attendance(db)
+    # seed_school(db)
+    # cameras = seed_camera(db)
+    # rooms = seed_room(db, cameras)
+    # db.user.delete_many({})
+    # students = seed_student(db, fake)
+    # teachers = seed_teacher(db, fake)
+    # seed_school_admin(db, fake)
+    # seed_admin()
+    # klasses = seed_klass(db, students)
+    # sessions = seed_session(db, fake, teachers, klasses, rooms)
+    # seed_session_attendance(db)
     seed_future_classes(db, fake)
     database.DbMgr.disconnect()
 
@@ -268,10 +269,6 @@ def seed_session_attendance(db):
 
 def seed_future_classes(db, fake):
     sessions = []
-    itr = Session.objects(state=SessionState.Scheduled)
-    for i in itr:
-        i.delete()
-    subjects = [Subject.Civics, Subject.Biology, Subject.Chemistry]
 
     teachers = []
     teachers_itr = Teacher.objects()
@@ -289,12 +286,15 @@ def seed_future_classes(db, fake):
         rooms.append(r)
 
     year = '2020'
-    month = 8
-    seed_day = 24
+    month = 9
+    seed_day = 1
     for day_delta in range(1, 6):
         for hour in range(8, 14):
             e_hour = hour + 1
-            day = seed_day + day_delta
+            day = (seed_day + day_delta)
+            if day > 31:
+                day = day - 31
+                month = month + 1
             st_date_str = f'{year}{month:02}{day:02} {hour:02}:00:00'
             en_date_str = f'{year}{month:02}{day:02} {e_hour:02}:00:00'
             st_time = datetime.datetime.strptime(st_date_str, "%Y%m%d %H:%M:%S")
@@ -313,7 +313,7 @@ def seed_future_classes(db, fake):
                               scheduled_end_time=en_time,
                               configs=[s_config],
                               scenarios=[s_scenario])
-            print("Saving session: ", session.to_json())
+            print("Saving session: ", session.to_mongo())
             session.save()
             sessions.append(session)
     return sessions

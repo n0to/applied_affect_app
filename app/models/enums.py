@@ -1,6 +1,13 @@
 from enum import Enum
 
 
+class AssignmentState(str, Enum):
+    Draft = "Draft",
+    Cancelled = "Cancelled"
+    PendingSubmission = "Pending Submission"
+    PendingGrading = "Pending Grading"
+
+
 class SessionState(str, Enum):
     Scheduled = "Scheduled",
     Started = "Started",
