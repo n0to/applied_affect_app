@@ -25,8 +25,8 @@ curriculum = Curriculum.IB
 sections = [Section.A, Section.B]
 subj_data = {}
 obj_data = {}
-obj_questions = []
-subj_questions = []
+obj_qnas = []
+subj_qnas = []
 
 
 def main():
@@ -54,13 +54,13 @@ def main():
 
 
 def read_questions():
-    itr = SubjectiveQuestion.objects()
+    itr = SubjQnA.objects()
     for i in itr:
-        subj_questions.append(i)
+        subj_qnas.append(i)
 
-    itr = ObjectiveQuestion.objects()
+    itr = ObjQnA.objects()
     for i in itr:
-        obj_questions.append(i)
+        obj_qnas.append(i)
 
 
 def read_vars():
@@ -101,18 +101,21 @@ def seed_objective_questions():
     grade = Grade(obj_data['Grade'])
     questions = obj_data['Questions']
     for qna, val in questions.items():
-        options = val['O']
+        print(qna, val)
+        teacher = teachers[random.randint(0, len(teachers) - 1)]
         max_score = val['S']
-        content = VersionedContent(content=val['Q'], version=1)
-        model_answer = ObjectiveAnswer(index=val['A']-1)
-        q = ObjectiveQuestion(options=options,
-                              max_score=max_score,
-                              model_answer=model_answer,
-                              content=content,
-                              subject=subject,
-                              curriculum=curriculum,
-                              topic=topic,
-                              grade=grade)
+        options = val['O']
+        answer = val['A']-1
+        content = ObjQnAContent(statement=val['Q'],
+                                options=options,
+                                answer=answer)
+        q = ObjQnA(subject=subject,
+                   topic=topic,
+                   curriculum=curriculum,
+                   grade=grade,
+                   max_score=max_score,
+                   created_by=teacher,
+                   content=[content])
         q.save()
         print(q.to_mongo())
 
@@ -126,23 +129,24 @@ def seed_subjective_questions():
     grade = Grade(subj_data['Grade'])
     questions = subj_data['Questions']
     for qna, val in questions.items():
-        content = VersionedContent(content=val['Q'], version=1)
-        ans_content = VersionedContent(content=val['A'], version=1)
-        model_answer = SubjectiveAnswer(content=ans_content)
-        q = SubjectiveQuestion(subject=subject,
-                               topic=topic,
-                               curriculum=curriculum,
-                               grade=grade,
-                               model_answer=model_answer,
-                               content=content)
+        content = SubjQnAContent(statement=val['Q'], answer=val['A'])
+        teacher = teachers[random.randint(0, len(teachers) - 1)]
+        max_score = val['S']
+        q = SubjQnA(subject=subject,
+                    topic=topic,
+                    curriculum=curriculum,
+                    grade=grade,
+                    max_score=max_score,
+                    created_by=teacher,
+                    content=[content])
         q.save()
         print(q.to_mongo())
 
 
 def seed_assignments():
     print("***************************************************")
-    print(subj_questions)
-    print(obj_questions)
+    print(subj_qnas)
+    print(obj_qnas)
     print(teachers)
     print(klasses)
     topic = "The Delhi Sultans"
@@ -169,19 +173,18 @@ def seed_assignments_questions():
     print("***************************************************")
     asses = Assignment.objects()
     for ass in asses:
-        for ques in subj_questions:
-            qna = QnA(question=ques,
-                      question_version=1)
+        for qna in subj_qnas:
+            latest_version = qna.content[0].version
             aqna = AssignmentQnA(assignment=ass,
-                                 qna=qna)
-
+                                 qna=qna,
+                                 qna_version=latest_version)
             aqna.save()
             print(aqna.to_mongo())
 
 
-def get_student_answer(question, version):
-    ans = question.model_answer.content.content
-    return SubjectiveAnswer(content=VersionedContent(content=ans, version=1))
+def get_student_answer(qna, version):
+    ans = qna.content[0].answer
+    return SubjAnsContent(answer=ans)
 
 
 def seed_submissions():
@@ -193,13 +196,14 @@ def seed_submissions():
     for student in students:
         print(student.name)
         for aqna in aqnas:
-            ans = get_student_answer(aqna.qna.question, aqna.qna.question_version)
+            ans = get_student_answer(aqna.qna, aqna.qna_version)
             asub = AssignmentSubmission(student=student,
                                         assignment=ass,
                                         aqna=aqna,
-                                        answer=ans)
+                                        answer=ans,
+                                        state=SubmissionState.Submitted)
             asub.save()
-            print(asub.answer.content.content)
+            print(asub.to_mongo())
 
 
 main()

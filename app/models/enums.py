@@ -1,11 +1,17 @@
 from enum import Enum
 
 
-class AssignmentState(str, Enum):
+class SubmissionState(str, Enum):
     Draft = "Draft",
-    Cancelled = "Cancelled"
-    PendingSubmission = "Pending Submission"
-    PendingGrading = "Pending Grading"
+    Submitted = "Submitted"
+
+
+class AssignmentState(str, Enum):
+    PastDeadline = "Past Deadline",
+    DeadlineApproaching = "Deadline Approaching",
+    OpenForSubmission = "Open for submission",
+    InProgress = "In Progress",
+    Submitted = "Submitted"
 
 
 class SessionState(str, Enum):
