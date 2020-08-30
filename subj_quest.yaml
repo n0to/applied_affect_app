@@ -1,11 +1,12 @@
-Grade: 7
+Grade: "7"
 Curriculum: CBSE
 Subject: History
 Topic: The Delhi Sultans
-QNA1:
-  Q: "What were the steps taken to ensure that muqtis performed their duties? Why do you think they may have wanted to
+Questions:
+  QNA1:
+    Q: "What were the steps taken to ensure that muqtis performed their duties? Why do you think they may have wanted to
   defy the orders of the Sultans?"
-  A: "The Khalji and Tughluq monarchs appointed military commanders as governors of territories of varying sizes. These lands were called iqta and their holder was called iqtadar or muqti. The steps that were taken to ensure that the muqtis performed their duties were
+    A: "The Khalji and Tughluq monarchs appointed military commanders as governors of territories of varying sizes. These lands were called iqta and their holder was called iqtadar or muqti. The steps that were taken to ensure that the muqtis performed their duties were
   1. The duties of the muqtis were to lead military campaigns and maintain law and order in
   their iqtas. In exchange for their military services, the muqtis collected the revenues of
   their assignments as salary. Their soldiers were paid salaries from the revenues.
@@ -17,69 +18,69 @@ QNA1:
   that he kept the required number of soldiers.
   The muqtis might have wanted to defy the orders of the Sultans because of the harsh
   conditions imposed on them by the Sultans."
-  S: 5
+    S: 5
 
-QNA2:
-  Q: "According to the “Circle of Justice”, why was it important for military commanders to keep the interests of the
+  QNA2:
+    Q: "According to the “Circle of Justice”, why was it important for military commanders to keep the interests of the
   peasantry in mind?"
-  A: "According to the “Circle of Justice”, it was important for the military commanders to keep the interests of the
+    A: "According to the “Circle of Justice”, it was important for the military commanders to keep the interests of the
   peasants in mind because the salaries of the soldiers came from the revenue collected from the peasants, and peasants
   could pay the revenue only when they were prosperous and happy. Hence, the military commanders promoted justice and
   honest governance."
-  S: 2
+    S: 2
 
-QNA3:
-  Q: "Which ruler first established his or her capital at Delhi?"
-  A: "Ananga Pala of the Tomara dynasty first established his capital at Delhi."
-  S: 1
+  QNA3:
+    Q: "Which ruler first established his or her capital at Delhi?"
+    A: "Ananga Pala of the Tomara dynasty first established his capital at Delhi."
+    S: 1
 
-QNA5:
-  Q: "What was the language of administration under the Delhi Sultans?"
-  A: "Persian was the language of administration under the Delhi Sultans."
-  S: 1
+  QNA4:
+    Q: "What was the language of administration under the Delhi Sultans?"
+    A: "Persian was the language of administration under the Delhi Sultans."
+    S: 1
 
-QNA6:
-  Q: "In whose reign did the Sultanate reach its farthest extent?"
-  A: "In Muhammad Tughluq’s reign, the Sultanate reached its farthest extent. Under his reign, the armies of the
+  QNA5:
+    Q: "In whose reign did the Sultanate reach its farthest extent?"
+    A: "In Muhammad Tughluq’s reign, the Sultanate reached its farthest extent. Under his reign, the armies of the
   Sultanate had defeated rival armies and seized cities, and consequently, the  kingdom of the Delhi Sultanate was vast."
-  S: 2
+    S: 2
 
-QNA7:
-  Q: "What is meant by the “internal” and “external” frontiers of the Sultanate?"
-  A: "“Internal” frontiers of the Sultanate consisted of the ‘hinterland’ of the garrison towns.During these campaigns,
+  QNA6:
+    Q: "What is meant by the “internal” and “external” frontiers of the Sultanate?"
+    A: "“Internal” frontiers of the Sultanate consisted of the ‘hinterland’ of the garrison towns.During these campaigns,
   forests were cleared in the Ganga-Yamuna doab and hunter gatherers and pastoralists expelled from their habitat.
 
   The “external” frontiers refer to the unconquered territories especially in the southern parts of the subcontinent.
   Military expeditions into southern India started during the reign of Alauddin Khalji and ended with the reign of
   Muhammad Tughluq."
-  S: 4
+    S: 4
 
-QNA8:
-  Q: "Why were the Delhi Sultans interested in cutting down forests? Does deforestation occur for the same reasons today?"
-  A: "Delhi Sultans were interested in cutting down forests because they wanted to encourage agriculture on the land.
+  QNA7:
+    Q: "Why were the Delhi Sultans interested in cutting down forests? Does deforestation occur for the same reasons today?"
+    A: "Delhi Sultans were interested in cutting down forests because they wanted to encourage agriculture on the land.
   They also wanted to cut down forests for creating protected territories against enemies and promoting trade routes.
   Today, deforestation occurs due to creation of roads and railways and promotion of industries. Hence, some of the
   reasons are the same for deforestation, then and now."
-  S: 2
+    S: 2
 
-QNA9:
-  Q: "Raziyya Sultan was unique in the history of the Delhi Sultanate. Do you think women leaders are accepted more
+  QNA8:
+    Q: "Raziyya Sultan was unique in the history of the Delhi Sultanate. Do you think women leaders are accepted more
   readily today?"
-  A: "Raziyya Sultan was unique in the history of the Delhi Sultanate based on her ability as an effective leader of the
+    A: "Raziyya Sultan was unique in the history of the Delhi Sultanate based on her ability as an effective leader of the
   Delhi Sultanate. Being a woman, she was not accepted as a ruler at the time. Women leaders are accepted more readily
   today as we live in a world of equality for both men and women. Women are provided with adequate opportunities to
   excel. For example,Indira Gandhi and Margaret Thatcher are examples of political leaders who have beena ccepted for
   their effective leadership. Moreover, there is scope for positive growth for women leaders in future."
-  S: 2
+    S: 2
 
-QNA10:
-  Q: "Do you think the authors of tawarikh would provide information about the lives of ordinary men and women?"
-  A: "The authors of tawarikh were learned men, secretaries, administrators, poets and courtiers.They recounted events
+  QNA9:
+      Q: "Do you think the authors of tawarikh would provide information about the lives of ordinary men and women?"
+      A: "The authors of tawarikh were learned men, secretaries, administrators, poets and courtiers.They recounted events
   and advised rulers on governance, emphasising the importance of just rule.
   The authors of tawarikh did not provide information about ordinary men and women because
        1. The authors of tawarikh lived in cities (mainly Delhi) and hardly ever in villages.
        2. They often wrote their histories for Sultans in the hope of rich rewards.
        3. These authors advised rulers on the basis of birthright and gender distinctions. Their ideas were not shared
   by everybody."
-  S: 4
+      S: 4
 

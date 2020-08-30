@@ -28,13 +28,12 @@ class VersionedContent(EmbeddedDocument):
 
 
 class Answer(EmbeddedDocument):
-    content = EmbeddedDocumentField(VersionedContent, required=True)
-
     meta = {'allow_inheritance': True}
 
 
 class SubjectiveAnswer(Answer):
     facts = ListField(EmbeddedDocumentField(Fact))
+    content = EmbeddedDocumentField(VersionedContent, required=True)
 
 
 class ObjectiveAnswer(Answer):
@@ -68,7 +67,6 @@ class QnA(EmbeddedDocument):
     question = ReferenceField(Question, required=True)
     question_version = IntField()
     answer = EmbeddedDocumentField(Answer)
-    score = IntField()
 
 
 class Assignment(Document):
@@ -78,7 +76,6 @@ class Assignment(Document):
     topic = StringField(required=True)
     deadline = DateTimeField()
     klass = ReferenceField(Klass)
-    state = StringField()
     datetime_modified = DateTimeField(default=datetime.now())
 
 
@@ -91,6 +88,7 @@ class AssignmentSubmission(Document):
     student = ReferenceField(Student, required=True)
     assignment = ReferenceField(Assignment, required=True)
     # Reference to assignment QnA which contains model/curated answer
-    qna = ReferenceField(AssignmentQnA, required=True)
+    aqna = ReferenceField(AssignmentQnA, required=True)
     answer = EmbeddedDocumentField(Answer)  # Answer submitted by student
     datetime_modified = DateTimeField(default=datetime.now())
+    score = IntField()

@@ -1,53 +1,54 @@
-Grade: 7
+Grade: "7"
 Curriculum: CBSE
 Subject: History
 Topic: The Delhi Sultans
-QNA1:
-  Q: When did India gain it's independence?
-  O:
-    - 1948
-    - 1945
-    - 1947
-    - 1984
-  A: 3
-  S: 1
+Questions:
+  QNA1:
+    Q: When did India gain it's independence?
+    O:
+      - "1948"
+      - "1945"
+      - "1947"
+      - "1984"
+    A: 3
+    S: 1
 
-QNA2:
-  Q: Who was the first Prime Minister of Independent India?
-  O:
-    - Nehru
-    - Indira Gandhi
-    - Mahatma Gandhi
-    - BR Ambedkar
-  A: 1
-  S: 1
+  QNA2:
+    Q: Who was the first Prime Minister of Independent India?
+    O:
+      - Nehru
+      - Indira Gandhi
+      - Mahatma Gandhi
+      - BR Ambedkar
+    A: 1
+    S: 1
 
-QNA3:
-  Q: Who wrote the constitution of India?
-  O:
-    - BR Ambedkar
-    - Mahatma Gandhi
-    - Sonia Gandhi
-    - Rahul Gandhi
-  A: 1
-  S: 1
+  QNA3:
+    Q: Who wrote the constitution of India?
+    O:
+      - BR Ambedkar
+      - Mahatma Gandhi
+      - Sonia Gandhi
+      - Rahul Gandhi
+    A: 1
+    S: 1
 
-QNA4:
-  Q: Who started Non-cooperation movement?
-  O:
-    - Mahatma Gandhi
-    - Nehru
-    - Subhas Chandra Bose
-    - Chandra Shekhar Azad
-  A: 1
-  S: 1
+  QNA4:
+    Q: Who started Non-cooperation movement?
+    O:
+      - Mahatma Gandhi
+      - Nehru
+      - Subhas Chandra Bose
+      - Chandra Shekhar Azad
+    A: 1
+    S: 1
 
-QNA5:
-  Q: Who killed Mohan Das Karam Chand Gandhi?
-  O:
-    - Sonia Gandhi
-    - Rahul Gandhi
-    - Indira Gandhi
-    - Nathu Ram Godse
-  A: 4
-  S: 1
+  QNA5:
+    Q: Who killed Mohan Das Karam Chand Gandhi?
+    O:
+      - Sonia Gandhi
+      - Rahul Gandhi
+      - Indira Gandhi
+      - Nathu Ram Godse
+    A: 4
+    S: 1
