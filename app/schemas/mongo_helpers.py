@@ -30,3 +30,4 @@ class LazyReferenceStr(str):
             return v
         else:
             raise ValueError("Invalid LazyReference")
+

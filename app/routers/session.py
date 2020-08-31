@@ -15,7 +15,7 @@ router = APIRouter()
 @router.get("/session/{id}", response_model=Session)
 def get_session(id: str):
     session = utils_session.get_session(id=id)
-    if not Session:
+    if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 

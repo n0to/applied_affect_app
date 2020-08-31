@@ -61,6 +61,7 @@ class Assignment(Document):
     deadline = DateTimeField()
     klass = ReferenceField(Klass)
     datetime_modified = DateTimeField(default=datetime.now())
+    state = StringField()
 
 
 class AnsContent(EmbeddedDocument):
@@ -84,7 +85,7 @@ class AssignmentQnA(Document):
     top_answers = ListField(SubjAnsContent)
 
 
-class AssignmentSubmission(Document):
+class AssignmentQnASubmission(Document):
     student = ReferenceField(Student, required=True)
     assignment = ReferenceField(Assignment, required=True)  # Assignment QnA which contains model/curated answer
     aqna = ReferenceField(AssignmentQnA, required=True)

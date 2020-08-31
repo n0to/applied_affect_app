@@ -6,10 +6,12 @@ from typing import List, Optional
 
 from pydantic import PositiveInt
 
-from app.models.enums import SessionState, Grade, Section, Subject
+from app.models.enums import SessionState, Grade, Section, Subject, AssignmentState
+from app.schemas.grading import Assignment
 from app.schemas.pulse import SessionPulse, SessionPulseAggregated
 from app.schemas.session import Session, SessionList
 from app.schemas.teacher import Teacher
+import app.utils.grading as utils_grading
 import app.utils.teacher as utils_teacher
 import app.utils.session as utils_session
 
@@ -44,6 +46,26 @@ def get_sessions(id: str,
     if not len(sessions):
         raise HTTPException(status_code=404, detail="Session not found")
     return sessions
+
+
+@router.get("/teacher/{id}/assignments", response_model=List[Assignment])
+def search_assignments(id: str,
+                       subject: Optional[Subject] = None,
+                       grade: Optional[Grade] = None,
+                       section: Optional[Section] = None,
+                       state: Optional[AssignmentState] = None,
+                       deadline: Optional[datetime] = None,
+                       max_records: Optional[PositiveInt] = 3):
+    asses = utils_grading.search_assignments(teacher=id,
+                                             subject=subject,
+                                             grade=grade,
+                                             section=section,
+                                             state=state,
+                                             deadline=deadline,
+                                             max_records=max_records)
+    if not len(asses):
+        raise HTTPException(status_code=404, detail="Assignments not found")
+    return asses
 
 
 @router.get("/teacher/{id}/session/{s_id}/pulse", response_model=List[SessionPulseAggregated])

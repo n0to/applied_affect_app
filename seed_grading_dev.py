@@ -197,11 +197,11 @@ def seed_submissions():
         print(student.name)
         for aqna in aqnas:
             ans = get_student_answer(aqna.qna, aqna.qna_version)
-            asub = AssignmentSubmission(student=student,
-                                        assignment=ass,
-                                        aqna=aqna,
-                                        answer=ans,
-                                        state=SubmissionState.Submitted)
+            asub = AssignmentQnASubmission(student=student,
+                                           assignment=ass,
+                                           aqna=aqna,
+                                           answer=ans,
+                                           state=SubmissionState.Submitted)
             asub.save()
             print(asub.to_mongo())
 

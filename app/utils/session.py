@@ -26,14 +26,14 @@ def search_sessions(max_records: PositiveInt, **kwargs):
     for k, v in kwargs.items():
         if v is not None:
             if k == "scheduled_start_time":
-                filters["scheduled_start_time"] = {"$gte": v}
+                filters[k] = {"$gte": v}
             elif k == "scheduled_end_time":
-                filters["scheduled_end_time"] = {"$lte": v}
+                filters[k] = {"$lte": v}
             elif k == "teacher":
-                filters["teacher"] = ObjectId(v)
-            elif k == "grade" or k == "section":
+                filters[k] = ObjectId(v)
+            elif k == "grade":
                 filters_klass[k] = Grade(v)
-            elif k == "section":
+            elif k == "section" and "grade" in kwargs:
                 filters_klass[k] = Section(v)
             elif k == "subject":
                 filters_klass[k] = Subject(v)
@@ -51,7 +51,6 @@ def search_sessions(max_records: PositiveInt, **kwargs):
         sessions = models_session.Session.objects(__raw__=filters).order_by('+scheduled_start_time').limit(max_records)
         for session in sessions:
             out = schemas_session.Session.from_orm(session)
-            logger
             out_sessions.append(out)
     except DoesNotExist:
         logger.info("No sessions exist for given criteria")

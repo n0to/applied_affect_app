@@ -7,11 +7,10 @@ class SubmissionState(str, Enum):
 
 
 class AssignmentState(str, Enum):
-    PastDeadline = "Past Deadline",
-    DeadlineApproaching = "Deadline Approaching",
-    OpenForSubmission = "Open for submission",
-    InProgress = "In Progress",
-    Submitted = "Submitted"
+    Graded = "Graded",
+    PendingGrading = "Pending Grading",
+    Draft = "Draft"
+    Open = "Open"
 
 
 class SessionState(str, Enum):
