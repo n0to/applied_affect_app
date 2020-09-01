@@ -42,6 +42,13 @@ class SubjAnsContent(AnsContent):
         orm_mode = True
 
 
+class ObjAnsContent(AnsContent):
+    answer: int
+
+    class Config:
+        orm_mode = True
+
+
 class SubjQnAContent(BaseModel):
     statement: str
     answer: str
@@ -119,9 +126,9 @@ class AssignmentSubmission(BaseModel):
     student: ObjectIdStr
     assignment: ObjectIdStr
     aqna: AssignmentQnA
-    answer: AnsContent
+    answer: Union[SubjAnsContent, ObjAnsContent]
     datetime_modified: datetime
-    score: PositiveInt
+    score: int
     state: AssignmentState
 
     class Config:

@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import Optional, List, Any
 
 from bson import ObjectId
 from loguru import logger
-from mongoengine import DoesNotExist
+from mongoengine import DoesNotExist, DynamicField
 from pydantic import PositiveInt
 import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
 from app.models.enums import Grade, Section, Subject
 
 
-def get_assignment(id: str, get_qnas: bool=False):
+def get_assignment(id: str, get_qnas: bool = False):
     out_ass = None
     logger.debug("Get assignment with id {}".format(id))
     try:
@@ -18,7 +18,7 @@ def get_assignment(id: str, get_qnas: bool=False):
         if get_qnas:
             aqnas = models_grading.AssignmentQnA.objects(assignment=id)
             for aqna in aqnas:
-                #Todo: Filter QnA content in aqna.qna w.r.t. requisite version in aqna.qna_version
+                # Todo: Filter QnA content in aqna.qna w.r.t. requisite version in aqna.qna_version
                 out_ass.qnas.append(schemas_grading.AssignmentQnA.from_orm(aqna))
     except DoesNotExist:
         logger.info("No assignment exists with id: {}".format(id))
@@ -26,6 +26,7 @@ def get_assignment(id: str, get_qnas: bool=False):
     return out_ass
 
 
+# Todo: Test
 def search_assignments(max_records: PositiveInt, **kwargs):
     out_asses = []
     filters = {}
@@ -54,6 +55,7 @@ def search_assignments(max_records: PositiveInt, **kwargs):
     return out_asses
 
 
+# Todo: Implement
 def get_assignment_qna(get_top_answers: bool, id: Optional[str] = None, assignment: Optional[str] = None):
     out_ass_qna = []
     logger.debug("")
@@ -62,3 +64,34 @@ def get_assignment_qna(get_top_answers: bool, id: Optional[str] = None, assignme
     except DoesNotExist:
         logger.info("No assignment qna exists with given criteria")
     return out_ass_qna
+
+
+# Todo: Implement
+def post_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
+    pass
+
+
+# Todo: Implement
+def update_assignment_qna_facts(id: str, facts: List[Any]):
+    pass
+
+
+# Todo: Implement
+def update_assignment_submission_facts(id: str, facts: List[Any]):
+    pass
+
+
+# Todo: Implement
+def is_submission_for_qna_complete(aqna_id: str):
+    pass
+
+
+# Todo: Implement
+def is_students_assignment_complete(ass_id: str):
+    pass
+
+
+# Todo: Implement
+def get_assignment_progress(ass_id: str):
+    pass
+

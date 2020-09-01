@@ -1,12 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from fastapi import APIRouter, HTTPException
+from mongoengine import DynamicField
 from pydantic import PositiveInt
 
 import app.utils.grading as utils_grading
 from app.models.enums import Subject, Grade, Section, AssignmentState
-from app.schemas.grading import Assignment, AssignmentQnA, AssignmentQnAWithTopAnswers
+from app.schemas.grading import Assignment, AssignmentQnA, AssignmentQnAWithTopAnswers, AnsContent
 
 router = APIRouter()
 
@@ -56,6 +57,21 @@ def get_assignment_qna(id: str):
 
 
 @router.put("/assignment_qna/{id}/facts")
-def update_assignment_facts(payload):
-    pass
+def update_assignment_qna_facts(id: str, facts: List[Any]):
+    resp = utils_grading.update_assignment_qna_facts(id, facts)
+    if not resp:
+        raise HTTPException("Couldn't update assignment_qna facts")
 
+
+@router.post("/assignment_qna/{aqna_id}/student/{s_id}/submission")
+def post_submission(aqna_id: str, s_id: str, answer: AnsContent):
+    resp = utils_grading.post_submission(aqna_id, s_id, answer)
+    if not resp:
+        raise HTTPException("Couldn't update assignment_qna student submission")
+
+
+@router.put('/assignment_qna_submission/{id}/facts')
+def update_assignment_submission_facts(id: str, facts: List[Any]):
+    resp = utils_grading.update_assignment_submission_facts(id, facts)
+    if not resp:
+        raise HTTPException("Couldn't update assignment qna submission facts")
