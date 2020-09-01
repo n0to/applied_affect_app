@@ -21,7 +21,8 @@ def get_session_attendance_aggregated(session_id: str):
     return session_attendance_agg
 
 
-def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None, to_datetime: Optional[datetime] = None):
+def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None,
+                      to_datetime: Optional[datetime] = None):
     logger.debug("Get pulse for session:{} from:{} to {}".format(session_id, from_datetime, to_datetime))
     pulse = []
     try:
@@ -50,3 +51,22 @@ def get_session_pulse_student(session_id: str):
     except DoesNotExist:
         logger.info("No pulse at student level exists for session_id: {}".format(session_id))
     return pulse
+
+
+def get_session_pulse_aggregated(id: str, to_datetime: Optional[datetime]):
+    logger.debug("Get session pulse aggregated for session_id: {} to : {}".format(id, to_datetime))
+    spa = None
+    try:
+        if to_datetime is None:
+            sess = models_session.Session.objects.only('actual_end_time').get(id=id)
+            to_datetime = sess.actual_end_time
+        logger.debug("to_datetime is now: {}".format(to_datetime))
+        attentiveness = models_pulse.SessionPulse.objects(session=id, datetime_sequence__lte=to_datetime,
+                                                          student_group_name='all').average('attentiveness')
+        engagement = models_pulse.SessionPulse.objects(session=id, datetime_sequence__lte=to_datetime,
+                                                       student_group_name='all').average('engagement')
+        spa = schemas_pulse.SessionPulseAggregated(attentiveness=attentiveness, engagement=engagement)
+
+    except DoesNotExist:
+        logger.info("No pulse exists for session_id: {}".format(id))
+    return spa

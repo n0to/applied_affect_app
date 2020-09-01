@@ -12,14 +12,6 @@ from app.schemas.grading import Assignment, AssignmentQnA, AssignmentQnAWithTopA
 router = APIRouter()
 
 
-@router.get("/assignment/{id}", response_model=Assignment)
-def get_assignment(id: str, get_qnas: Optional[bool] = False):
-    ass = utils_grading.get_assignment(id=id, get_qnas=get_qnas)
-    if not ass:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    return ass
-
-
 @router.get("/assignment/search", response_model=List[Assignment])
 def search_assignments(teacher: Optional[str] = None,
                        subject: Optional[Subject] = None,
@@ -38,6 +30,14 @@ def search_assignments(teacher: Optional[str] = None,
     if not len(asses):
         raise HTTPException(status_code=404, detail="Assignments not found")
     return asses
+
+
+@router.get("/assignment/{id}", response_model=Assignment)
+def get_assignment(id: str, get_qnas: Optional[bool] = False):
+    ass = utils_grading.get_assignment(id=id, get_qnas=get_qnas)
+    if not ass:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    return ass
 
 
 @router.get("/assignment/{id}/qna", response_model=List[AssignmentQnA])

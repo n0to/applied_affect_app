@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 
 import app.utils.pulse as pulse_utils
-from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent
+from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent, SessionPulseAggregated
 
 router = APIRouter()
 
@@ -23,6 +23,14 @@ def get_session_pulse(id: str, from_datetime: Optional[datetime] = None, to_date
     if not len(session_pulse):
         raise HTTPException(status_code=400, detail="No pulse found for given session")
     return session_pulse
+
+
+@router.get("/session/{id}/pulse_aggregated", response_model=SessionPulseAggregated)
+def get_session_pulse_aggregated(id: str, to_datetime: Optional[datetime] = None):
+    session_pulse_aggregated = pulse_utils.get_session_pulse_aggregated(id, to_datetime)
+    if not session_pulse_aggregated:
+        raise HTTPException(status_code=400, detail="No attendance found with given session id")
+    return session_pulse_aggregated
 
 
 @router.get("/session/{id}/student_pulse", response_model=List[SessionPulseStudent])

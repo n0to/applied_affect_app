@@ -6,7 +6,8 @@ from mongoengine import DoesNotExist, DynamicField
 from pydantic import PositiveInt
 import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
-from app.models.enums import Grade, Section, Subject
+import app.models.school as models_school
+from app.models.enums import Grade, Section, Subject, AssignmentState
 
 
 def get_assignment(id: str, get_qnas: bool = False):
@@ -26,27 +27,38 @@ def get_assignment(id: str, get_qnas: bool = False):
     return out_ass
 
 
-# Todo: Test
 def search_assignments(max_records: PositiveInt, **kwargs):
     out_asses = []
     filters = {}
     filters_klass = {}
     for k, v in kwargs.items():
-        if k == "deadline":
-            filters[k] = {"$gte": v}
-        elif k == "teacher":
-            filters["created_by"] = ObjectId(v)
-        elif k == "grade":
-            filters_klass[k] = Grade(v)
-        elif k == "section" and "grade" in kwargs:
-            filters_klass[k] = Section(v)
-        elif k == "subject":
-            filters[k] = Subject(v)
-        else:
-            filters[k] = v
-    logger.bind(payload=filters).debug("Searching assignments with filters:")
+        if v is not None:
+            if k == "deadline":
+                filters[k] = {"$gte": v}
+            elif k == "teacher":
+                filters[k] = ObjectId(v)
+            elif k == "grade":
+                filters_klass[k] = Grade(v)
+            elif k == "section" and "grade" in kwargs and kwargs["grade"] is not None:
+                filters_klass[k] = Section(v)
+            elif k == "subject":
+                filters[k] = Subject(v)
+            elif k == "state":
+                filters[k] = AssignmentState(v)
+
     try:
-        asses = models_grading.Assignment.objects(__raw__=filters).orderBy('+deadline').limit(max_records)
+        if len(filters_klass.keys()) > 0:
+            klass_ids = []
+            logger.bind(payload=filters_klass).debug("Searching klasses with filters:")
+            klass_itr = models_school.Klass.objects(__raw__=filters_klass).only('id')
+            for klass in klass_itr:
+                klass_ids.append(klass.id)
+            if len(klass_ids) > 0:
+                filters["klass"] = {"$in": klass_ids}
+            else:
+                raise DoesNotExist()
+        logger.bind(payload=filters).debug("Searching assignments with filters:")
+        asses = models_grading.Assignment.objects(__raw__=filters).order_by('+deadline').limit(max_records)
         for ass in asses:
             out_ass = schemas_grading.Assignment.from_orm(ass)
             out_asses.append(out_ass)
