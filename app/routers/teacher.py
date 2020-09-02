@@ -33,7 +33,7 @@ def get_sessions(id: str,
                  section: Optional[Section] = None,
                  subject: Optional[Subject] = None,
                  scheduled_end_time: Optional[datetime] = None,
-                 scheduled_start_time: Optional[datetime] = datetime.now(),
+                 scheduled_start_time: Optional[datetime] = None,
                  max_records: Optional[PositiveInt] = 3):
     sessions = utils_session.search_sessions(state=state,
                                              scheduled_start_time=scheduled_start_time,
