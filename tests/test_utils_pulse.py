@@ -1,12 +1,20 @@
 import unittest
+from datetime import datetime
+
+from bson import ObjectId
+
 from app.db.database import DbMgr
 import pprint
 from app.config import get_settings
 import app.utils.pulse as utils_pulse
 import bson
 import app.models.pulse as models_pulse
+import app.schemas.pulse_events as schemas_pulse_events
 import app.models.session as models_session
+import app.models.pulse_events as models_pulse_events
+import app.utils.pulse_events as utils_pulse_events
 import time
+import random
 
 pp = pprint.PrettyPrinter(indent=2, sort_dicts=True)
 session_id = '5f32686f9c6348c3225aaaea'
@@ -63,3 +71,33 @@ class TestMongo(unittest.TestCase):
             pp.pprint(str(pulse.student.id))
         elapsed = time.time() - start
         pp.pprint("Elapsed: {}".format(elapsed))
+
+    def test_pulse_events(self):
+        session_id = "5f427f3d293d7b69b5716d1f"
+        camera_id = "5f427f37293d7b69b5716cf1"
+        frame_type = "END"
+        frame_number = 3
+        person_id = "foobar" + str(random.randint(10, 12))
+        image_url = "http://foobar.com"
+
+        #sample = models_pulse_events.PulseProcessing(frame_type=frame_type,
+        #                                             frame_number=frame_number,
+        #                                             person_id=person_id,
+        #                                             image_url=image_url,
+        #                                             session=ObjectId(session_id),
+        #                                             camera=ObjectId(camera_id))
+        # sample.save()
+        # person_detection_event: Optional[PersonDetectionEvent] = None
+        # face_detection_event: Optional[FaceDetectionEvent] = None
+        # face_embedding_event: Optional[FaceEmbeddingEvent] = None
+        # face_recognition_event: Optional[FaceRecognitionEvent] = None
+        # gaze_detection_event: Optional[GazeDetectionEvent] = None
+        # action_recognition_event: Optional[ActionRecognitionEvent] = None
+        gde = schemas_pulse_events.GazeDetectionEvent(roll=10, pitch=20, yaw=30, detected_at=datetime.now())
+        pp = schemas_pulse_events.PulseProcessing(frame_type=frame_type,
+                                                  frame_number=frame_number,
+                                                  person_id=person_id,
+                                                  image_url=image_url,
+                                                  gaze_detection_event=gde)
+        event = utils_pulse_events.upsert_pulse_event(event=pp, session_id=session_id, camera_id=camera_id)
+        print(event)

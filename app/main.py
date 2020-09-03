@@ -6,28 +6,7 @@ from loguru import logger
 from app.config import get_settings, Settings
 from app.custom_logging import InterceptHandler, format_record
 from app.db.database import DbMgr
-from app.routers import session, auth, student, teacher, pulse, school, grading
-
-
-def create_app() -> FastAPI:
-    app = FastAPI(title='Applied Affect Backend', Debug=True)
-    router = APIRouter()
-    app.include_router(session.router)
-    app.include_router(student.router)
-    app.include_router(teacher.router)
-    app.include_router(pulse.router)
-    app.include_router(school.router)
-    app.include_router(auth.router)
-    app.include_router(grading.router)
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    configure_logger()
-    return app
+from app.routers import session, auth, student, teacher, pulse, school, grading, pulse_events
 
 
 def configure_logger():
@@ -43,6 +22,28 @@ def configure_logger():
     logger.configure(
         handlers=[{"sink": sys.stdout, "level": settings.logging_level, "format": format_record, "colorize": True}]
     )
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(title='Applied Affect Backend', Debug=True)
+    router = APIRouter()
+    app.include_router(session.router)
+    app.include_router(student.router)
+    app.include_router(teacher.router)
+    app.include_router(pulse.router)
+    app.include_router(school.router)
+    app.include_router(auth.router)
+    app.include_router(grading.router)
+    app.include_router(pulse_events.router)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    configure_logger()
+    return app
 
 
 app = create_app()
