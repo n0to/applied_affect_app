@@ -79,8 +79,8 @@ def get_assignment_qna(get_top_answers: bool, id: Optional[str] = None, assignme
 
 
 # Todo: Implement
-def post_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
-    pass
+def post_qna_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
+    num_updated = models_grading.AssignmentQnASubmission.objects(student=s_id, aqna=aqna_id)
 
 
 # Todo: Implement
@@ -89,7 +89,7 @@ def update_assignment_qna_facts(id: str, facts: List[Any]):
 
 
 # Todo: Implement
-def update_assignment_submission_facts(id: str, facts: List[Any]):
+def update_assignment_qna_submission_facts(id: str, facts: List[Any]):
     pass
 
 
@@ -107,3 +107,6 @@ def is_students_assignment_complete(ass_id: str):
 def get_assignment_progress(ass_id: str):
     pass
 
+
+def get_assignment_num_questions(ass_id: str):
+    pass

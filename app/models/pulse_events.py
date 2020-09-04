@@ -31,7 +31,7 @@ class FaceDetectionEvent(EmbeddedDocument):
 
 
 class FaceEmbeddingEvent(EmbeddedDocument):
-    embedding: ListField(FloatField)
+    embedding = ListField(FloatField)
     detected_at = DateTimeField()
 
 
