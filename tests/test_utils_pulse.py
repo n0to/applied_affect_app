@@ -94,10 +94,21 @@ class TestMongo(unittest.TestCase):
         # gaze_detection_event: Optional[GazeDetectionEvent] = None
         # action_recognition_event: Optional[ActionRecognitionEvent] = None
         gde = schemas_pulse_events.GazeDetectionEvent(roll=10, pitch=20, yaw=30, detected_at=datetime.now())
+        are = schemas_pulse_events.ActionRecognitionEvent(
+            actions=[schemas_pulse_events.Action(name="reading", confidence=0.5)],
+            detected_at=datetime.now())
+
+        fe = schemas_pulse_events.FaceEmbeddingEvent(embedding=[1,2,3], detected_at=datetime.now())
+        #pp = schemas_pulse_events.PulseProcessing(frame_type=frame_type,
+        #                                          frame_number=frame_number,
+        #                                          person_id=person_id,
+        #                                          image_url=image_url,
+        #                                          gaze_detection_event=gde,
+        #                                          action_recognition_event=are)
         pp = schemas_pulse_events.PulseProcessing(frame_type=frame_type,
                                                   frame_number=frame_number,
                                                   person_id=person_id,
                                                   image_url=image_url,
-                                                  gaze_detection_event=gde)
+                                                  face_embedding_event=fe)
         event = utils_pulse_events.upsert_pulse_event(event=pp, session_id=session_id, camera_id=camera_id)
         print(event)
