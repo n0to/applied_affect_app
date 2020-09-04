@@ -47,7 +47,13 @@ class GazeDetectionEvent(EmbeddedDocument):
     detected_at = DateTimeField()
 
 
+class Action(EmbeddedDocument):
+    name = StringField()
+    confidence = FloatField()
+
+
 class ActionRecognitionEvent(EmbeddedDocument):
+    actions = ListField(EmbeddedDocumentField(Action))
     detected_at = DateTimeField()
 
 

@@ -3,8 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, AnyUrl
 
-from app.schemas.mongo_helpers import ObjectIdStr
-
 
 class PersonDetectionEvent(BaseModel):
     top_left_x: int
@@ -62,7 +60,16 @@ class GazeDetectionEvent(BaseModel):
         orm_mode = True
 
 
+class Action(BaseModel):
+    name: str
+    confidence: float
+
+    class Config:
+        orm_mode = True
+
+
 class ActionRecognitionEvent(BaseModel):
+    actions: List[Action] = []
     detected_at: datetime
 
     class Config:
