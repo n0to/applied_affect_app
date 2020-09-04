@@ -1,17 +1,17 @@
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from app.models.enums import Scenario, Subject, SessionState
+from app.models.enums import Scenario, Subject, SessionState, InterventionThresholdsDefaults
 from app.schemas.mongo_helpers import ObjectIdStr
 from app.schemas.school import Klass, Room, KlassWithoutStudentList
 from app.schemas.teacher import Teacher
 
 
 class SessionConfiguration(BaseModel):
-    th_min_student_for_int: Optional[int] = Field(None)
-    th_min_gap_bet_int: Optional[int] = Field(None)
-    th_min_gap_for_student_int: Optional[int] = Field(None)
-    datetime_created: Optional[datetime] = Field(None, description="Description Here")
+    th_min_student_for_int: Optional[int] = Field(InterventionThresholdsDefaults.MIN_STUDENT_FOR_INT)
+    th_min_gap_bet_int: Optional[int] = Field(InterventionThresholdsDefaults.MIN_GAP_BET_INT)
+    th_min_gap_for_student_int: Optional[int] = Field(InterventionThresholdsDefaults.MIN_GAP_BET_STUDENT_INT)
+    datetime_created: Optional[datetime] = Field(datetime.now(), description="Description Here")
 
     class Config:
         orm_mode = True
@@ -19,7 +19,7 @@ class SessionConfiguration(BaseModel):
 
 class SessionScenario(BaseModel):
     name: Scenario = Field(None)
-    datetime_created: Optional[datetime] = Field(None, description="Description Here")
+    datetime_created: Optional[datetime] = Field(datetime.now(), description="Description Here")
 
     class Config:
         orm_mode = True

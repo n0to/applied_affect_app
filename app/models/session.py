@@ -10,7 +10,7 @@ from mongoengine import (
     ListField,
     EmbeddedDocumentField,
     URLField,
-    ReferenceField)
+    ReferenceField, EmbeddedDocumentListField)
 from app.models.school import Room, Klass
 from app.models.teacher import Teacher
 from app.models.enums import SessionState, InterventionThresholdsDefaults
@@ -40,8 +40,8 @@ class Session(Document):
     scheduled_end_time = DateTimeField(required=True)
     actual_start_time = DateTimeField()
     actual_end_time = DateTimeField()
-    scenarios = ListField(EmbeddedDocumentField(SessionScenario))
-    configs = ListField(EmbeddedDocumentField(SessionConfiguration))
+    scenarios = EmbeddedDocumentListField(SessionScenario)
+    configs = EmbeddedDocumentListField(SessionConfiguration)
     video_url = ListField(URLField())
     state = StringField(default=SessionState.Scheduled)
     datetime_modified = DateTimeField(default=datetime.now)

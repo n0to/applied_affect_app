@@ -9,6 +9,19 @@ import app.models.session as models_session
 import app.schemas.pulse as schemas_pulse
 
 
+def get_session_attendance(session_id: str):
+    logger.debug("Get session attendance for session {}".format(session_id))
+    session_attendance = []
+    try:
+        sat_itr = models_pulse.SessionAttendance.objects(session=session_id)
+        for sat in sat_itr:
+            out_sat = schemas_pulse.SessionAttendance.from_orm(sat)
+            session_attendance.append(out_sat)
+    except DoesNotExist:
+        logger.info("No session attendance exists with session id:{}".format(session_id))
+    return session_attendance
+
+
 def get_session_attendance_aggregated(session_id: str):
     logger.debug("Get session attendance for session {}".format(session_id))
     session_attendance_agg = None

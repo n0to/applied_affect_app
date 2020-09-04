@@ -7,7 +7,7 @@ from mongoengine import (
     URLField,
     ReferenceField,
     EmailField,
-    DateTimeField, EmbeddedDocumentField)
+    DateTimeField, EmbeddedDocumentField, EmbeddedDocumentListField)
 from app.models.student import StudentGroup, Student
 
 
@@ -35,7 +35,7 @@ class Room(Document):
 class Klass(Document):
     grade = StringField(required=True)
     section = StringField(required=True, unique_with='grade')
-    student_groups = ListField(EmbeddedDocumentField(StudentGroup))
+    student_groups = EmbeddedDocumentListField(StudentGroup)
     curriculum = StringField()
     datetime_modified = DateTimeField(default=datetime.now())
     members = ListField(ReferenceField(Student))

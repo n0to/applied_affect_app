@@ -10,7 +10,7 @@ from mongoengine import (
     ListField,
     ObjectIdField,
     DynamicField,
-    EmbeddedDocumentField, SequenceField, SortedListField)
+    EmbeddedDocumentField, SequenceField, SortedListField, EmbeddedDocumentListField)
 
 from app.models.school import Klass
 from app.models.student import Student
@@ -82,7 +82,7 @@ class AssignmentQnA(Document):
     qna = ReferenceField(QnA, required=True)
     qna_version = IntField()
     # This answer and facts represents the best ones submitted
-    top_answers = ListField(SubjAnsContent)
+    top_answers = EmbeddedDocumentListField(SubjAnsContent)
 
 
 class AssignmentQnASubmission(Document):

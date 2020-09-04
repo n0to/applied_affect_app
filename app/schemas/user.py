@@ -7,7 +7,7 @@ class User(BaseModel):
     id: ObjectIdStr
     name: str
     email: EmailStr
-    phone: str
+    phone: Optional[str]
     images: List[AnyHttpUrl] = []
     disabled: Optional[bool] = Field(False)
     role: str = Field(alias='_cls')

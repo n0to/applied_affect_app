@@ -5,14 +5,14 @@ from mongoengine import (
     BooleanField,
     IntField,
     DateTimeField,
-    StringField)
+    StringField, ReferenceField)
 from app.models.session import Session
 from app.models.student import Student, StudentGroup
 
 
 class SessionAttendance(Document):
     session = LazyReferenceField(Session)
-    student = LazyReferenceField(Student)
+    student = ReferenceField(Student)
     is_present = BooleanField()
     datetime_modified = DateTimeField(default=datetime.now())
     version = StringField()
@@ -37,32 +37,3 @@ class SessionPulseStudent(Document):
     datetime_sequence = DateTimeField(default=datetime.now())
     version = StringField()
 
-
-'''
-class BoundingBox(EmbeddedDocument):
-    x = FloatField(required=True)
-    y = FloatField(required=True)
-    length = FloatField(required=True)
-    width = FloatField(required=True)
-
-
-class FacialAnalysis(EmbeddedDocument):
-    face_bbox = EmbeddedDocumentField(BoundingBox)
-    roll = FloatField()
-    pitch = FloatField()
-    yaw = FloatField()
-
-
-class SessionPulseStudentRaw(Document):
-    frame_id = IntField(required=True)
-    datetime_modified = DateTimeField(default=datetime.datetime.now)
-    session = LazyReferenceField(Session, required=True)
-    human_bbox = EmbeddedDocumentField(BoundingBox)
-    facial_analysis = EmbeddedDocumentField(FacialAnalysis)
-    detected_student = ReferenceField(Student)
-    activity = StringField()
-
-
-class SessionIntervention(Document):
-    pass
-'''

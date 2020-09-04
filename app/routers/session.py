@@ -6,7 +6,7 @@ from loguru import logger
 from pydantic import PositiveInt
 
 from app.models.enums import SessionState, Grade, Section, Subject
-from app.schemas.session import Session, SessionCreate, SessionUpdate
+from app.schemas.session import Session, SessionCreate, SessionUpdate, SessionScenario, SessionConfiguration
 import app.utils.session as utils_session
 
 router = APIRouter()
@@ -20,7 +20,7 @@ def get_session(id: str):
     return session
 
 
-@router.get("session/search", response_model=List[Session])
+@router.get("/session/search", response_model=List[Session])
 def get_sessions(state: Optional[SessionState] = None,
                  grade: Optional[Grade] = None,
                  section: Optional[Section] = None,
@@ -42,9 +42,22 @@ def get_sessions(state: Optional[SessionState] = None,
     return sessions
 
 
-@router.put("/session/{id}")
-def update_session(id: str, session: SessionUpdate):
-    pass
+@router.put("/session/{id}/scenario", response_model=int)
+def update_session_scenario(id: str, sc: SessionScenario):
+    num_updated = utils_session.update_session_scenario(id=id, session_scenario=sc)
+    return num_updated
+
+
+@router.put("/session/{id}/configuration", response_model=int)
+def update_session_configuration(id: str, sc: SessionConfiguration):
+    num_updated = utils_session.update_session_configuration(id=id, session_configuration=sc)
+    return num_updated
+
+
+@router.put("/session/{id}", response_model=int)
+def update_session(id: str, session_update: SessionUpdate):
+    num_updated = utils_session.update_session(id=id, session_update=session_update)
+    return num_updated
 
 
 @router.post("/session")

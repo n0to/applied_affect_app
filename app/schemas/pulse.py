@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from app.schemas.mongo_helpers import ObjectIdStr, LazyReferenceStr
+from app.schemas.mongo_helpers import LazyReferenceStr
 from app.schemas.student import Student
 
 

@@ -60,9 +60,39 @@ def search_sessions(max_records: PositiveInt, **kwargs):
     return out_sessions
 
 
+# Todo: Implement
 def create_session(session: schemas_session.SessionCreate):
     pass
 
 
-def update_session(session: schemas_session.SessionUpdate):
+# Todo: Implement
+def update_session(id: str, session_update: schemas_session.SessionUpdate):
     pass
+
+
+# Todo: Change to atomic update
+def update_session_configuration(id: str, session_configuration: schemas_session.SessionConfiguration):
+    logger.bind(payload=session_configuration.dict()).debug("Updating session {} with configuration".format(id))
+    num_updated = 0
+    try:
+        session = models_session.Session.objects.get(id=id)
+        session.configs.append(models_session.SessionConfiguration(**session_configuration.dict()))
+        session.save()
+        num_updated = num_updated + 1
+    except DoesNotExist:
+        logger.info("No session exists with id: {}".format(id))
+    return num_updated
+
+
+# Todo: Change to atomic update
+def update_session_scenario(id: str, session_scenario: schemas_session.SessionScenario):
+    logger.bind(payload=session_scenario.dict()).debug("Updating session {} with scenario".format(id))
+    num_updated = 0
+    try:
+        session = models_session.Session.objects.get(id=id)
+        session.scenarios.append(models_session.SessionScenario(**session_scenario.dict()))
+        session.save()
+        num_updated = num_updated + 1
+    except DoesNotExist:
+        logger.info("No session exists with id: {}".format(id))
+    return num_updated
