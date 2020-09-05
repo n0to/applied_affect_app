@@ -80,17 +80,25 @@ def get_assignment_qna(get_top_answers: bool, id: Optional[str] = None, assignme
 
 # Todo: Implement
 def post_qna_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
-    num_updated = models_grading.AssignmentQnASubmission.objects(student=s_id, aqna=aqna_id)
-
-
-# Todo: Implement
-def update_assignment_qna_facts(id: str, facts: List[Any]):
     pass
 
 
-# Todo: Implement
+def update_assignment_qna_facts(id: str, ans_content_list: List[schemas_grading.SubjAnsContent]):
+    logger.bind(payload=ans_content_list).debug("Updating AQNA {} with content: ".format(id))
+    ans_emb_list = []
+    for ans in ans_content_list:
+        ans_emb = models_grading.SubjAnsContent(**ans.dict())
+        ans_emb_list.append(ans_emb)
+    num_updated = models_grading.AssignmentQnA.objects(id=id).update(top_answers=ans_emb_list)
+    return num_updated
+
+
 def update_assignment_qna_submission_facts(id: str, facts: List[Any]):
-    pass
+    logger.bind(payload=facts).debug("Updating AQNA Submission {} with facts: ".format(id))
+    aqnas = models_grading.AssignmentQnASubmission.objects.get(id=id)
+    aqnas.answer.facts = facts
+    aqnas.save()
+    return 1
 
 
 # Todo: Implement

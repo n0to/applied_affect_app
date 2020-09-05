@@ -7,7 +7,7 @@ from pydantic import PositiveInt
 
 import app.utils.grading as utils_grading
 from app.models.enums import Subject, Grade, Section, AssignmentState
-from app.schemas.grading import Assignment, AssignmentQnA, AssignmentQnAWithTopAnswers, AnsContent
+from app.schemas.grading import Assignment, AssignmentQnA, AssignmentQnAWithTopAnswers, AnsContent, SubjAnsContent
 
 router = APIRouter()
 
@@ -64,14 +64,14 @@ def update_assignment_qna_facts(id: str, facts: List[Any]):
 
 
 @router.post("/assignment_qna/{aqna_id}/student/{s_id}/submission")
-def post_submission(aqna_id: str, s_id: str, answer: AnsContent):
+def post_submission(aqna_id: str, s_id: str, answer: SubjAnsContent):
     resp = utils_grading.post_qna_submission(aqna_id, s_id, answer)
     if not resp:
         raise HTTPException("Couldn't update assignment_qna student submission")
 
 
 @router.put('/assignment_qna_submission/{id}/facts')
-def update_assignment_submission_facts(id: str, facts: List[Any]):
-    resp = utils_grading.update_assignment_qna_submission_facts(id, facts)
+def update_assignment_submission_facts(id: str, ans_content: List[AnsContent]):
+    resp = utils_grading.update_assignment_qna_submission_facts(id, ans_content)
     if not resp:
         raise HTTPException("Couldn't update assignment qna submission facts")
