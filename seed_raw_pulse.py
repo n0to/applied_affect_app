@@ -30,8 +30,10 @@ def main():
                            username=settings.mongo_username,
                            password=settings.mongo_password,
                            host=settings.mongo_host)
-    #session_id = "5f4a5884ac84c57e9a43ad8f"  # Used with jijo
-    session_id = "5f43b06862752155f1e7da87"   # Used with original
+    # session_id = "5f4a5884ac84c57e9a43ad8f"  # Used with jijo
+    # session_id = "5f43b06862752155f1e7da87"   # Used with original
+    session_id = "5f43b06862752155f1e7da94"   # Used with original2
+
     num_del = models_pulse_events.PulseProcessing.objects(session=session_id).delete()
     pp.pprint("Num deleted {}".format(num_del))
     session = models_session.Session.objects.get(id=session_id)
@@ -45,8 +47,10 @@ def main():
     for student in students:
         student_school_ids.append(student.school_id)
 
-    #pickle_file_path = "/home/neo/Downloads/cam_video_jijo_with_student_id_flattened_data.pkl"
-    pickle_file_path = "/home/neo/Downloads/cam_video_original_with_student_id_flattened_data.pkl"
+    # pickle_file_path = "/home/neo/Downloads/cam_video_jijo_with_student_id_flattened_data.pkl"
+    # pickle_file_path = "/home/neo/Downloads/cam_video_original_with_student_id_flattened_data.pkl"
+
+    pickle_file_path = "/home/neo/Downloads/cam_video_original2_with_student_id_flattened_data.pkl"
     dbfile = open(pickle_file_path, 'rb')
     faces = {}
     db = pickle.load(dbfile)
