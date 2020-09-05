@@ -17,6 +17,11 @@ from app.models.student import Student
 from app.models.teacher import Teacher
 
 
+class Facts(EmbeddedDocument):
+    fact: StringField()
+    metadata: DynamicField()
+
+
 class QnA(Document):
     subject = StringField(required=True)
     topic = StringField(required=True)

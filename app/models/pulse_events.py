@@ -70,3 +70,4 @@ class PulseProcessing(Document):
     face_recognition_event = EmbeddedDocumentField(FaceRecognitionEvent)
     gaze_detection_event = EmbeddedDocumentField(GazeDetectionEvent)
     action_recognition_event = EmbeddedDocumentField(ActionRecognitionEvent)
+    detected_at = DateTimeField()
