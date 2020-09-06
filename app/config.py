@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, FilePath
+from pydantic import BaseSettings, FilePath, HttpUrl
 from functools import lru_cache
 from loguru import logger
 import os
@@ -33,3 +33,5 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_seconds: int
+    svc_fact_extraction: HttpUrl
+    svc_fact_comparison: HttpUrl

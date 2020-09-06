@@ -10,16 +10,18 @@ from mongoengine import (
     ListField,
     ObjectIdField,
     DynamicField,
-    EmbeddedDocumentField, SequenceField, SortedListField, EmbeddedDocumentListField)
+    EmbeddedDocumentField, SequenceField, SortedListField, EmbeddedDocumentListField, FloatField)
 
 from app.models.school import Klass
 from app.models.student import Student
 from app.models.teacher import Teacher
 
 
-class Facts(EmbeddedDocument):
-    fact: StringField()
-    metadata: DynamicField()
+class FactContent(EmbeddedDocument):
+    fact = StringField()
+    sentence = StringField()
+    serialized_fact = DynamicField()
+    score = FloatField()
 
 
 class QnA(Document):
@@ -40,7 +42,7 @@ class SubjQnAContent(EmbeddedDocument):
     answer = StringField()
     version = SequenceField()
     datetime_modified = DateTimeField(default=datetime.now())
-    facts = ListField(DynamicField())
+    facts = EmbeddedDocumentListField(FactContent)
 
 
 class SubjQnA(QnA):
@@ -79,15 +81,16 @@ class ObjAnsContent(AnsContent):
 
 class SubjAnsContent(AnsContent):
     answer = StringField()
-    facts = ListField(DynamicField())
+    facts = EmbeddedDocumentListField(FactContent)
 
 
 class AssignmentQnA(Document):
     assignment = ReferenceField(Assignment, required=True)
     qna = ReferenceField(QnA, required=True)
     qna_version = IntField()
-    # This answer and facts represents the best ones submitted
-    top_answers = EmbeddedDocumentListField(SubjAnsContent)
+    qna_readable_id = StringField()
+    base_facts = EmbeddedDocumentListField(FactContent)
+    max_score = IntField()
 
 
 class AssignmentQnASubmission(Document):
@@ -98,5 +101,6 @@ class AssignmentQnASubmission(Document):
     datetime_modified = DateTimeField(default=datetime.now())
     score = IntField()
     state = StringField()
+    scoring_state = StringField()
 
 

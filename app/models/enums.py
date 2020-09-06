@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+class ScoringState(str, Enum):
+    Scored = "Scored",
+    Pending = "Pending",
+    Unavailable = "Unavailable"
+
+
 class SubmissionState(str, Enum):
     Draft = "Draft",
     Submitted = "Submitted"
