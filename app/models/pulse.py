@@ -5,7 +5,7 @@ from mongoengine import (
     BooleanField,
     IntField,
     DateTimeField,
-    StringField, ReferenceField)
+    StringField, ReferenceField, DecimalField)
 from app.models.session import Session
 from app.models.student import Student, StudentGroup
 
@@ -20,8 +20,8 @@ class SessionAttendance(Document):
 
 class SessionPulse(Document):
     session = LazyReferenceField(Session)
-    attentiveness = IntField()
-    engagement = IntField()
+    attentiveness = DecimalField()
+    engagement = DecimalField()
     student_group_name = StringField()
     datetime_modified = DateTimeField(default=datetime.now())
     datetime_sequence = DateTimeField(default=datetime.now())
@@ -41,12 +41,18 @@ class SessionPulseStudent(Document):
 class SessionIntervention(Document):
     session = LazyReferenceField(Session)
     datetime_created = DateTimeField(default=datetime.now())
-
+    datetime_sequence = DateTimeField(default=datetime.now())
+    version = StringField()
+    intervention_reason = StringField()  # engagement, attention etc.
+    intervention_period_start = DateTimeField()
+    intervention_period_end = DateTimeField()
+    intervention_reason_value = DecimalField()
+    intervention_reason_threshold = DecimalField()
     meta = {'allow_inheritance': True}
 
 
 class StudentGroupIntervention(SessionIntervention):
-    name = StringField()
+    student_group_name = StringField()
 
 
 class StudentIntervention(SessionIntervention):

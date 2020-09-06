@@ -7,7 +7,7 @@ from pandas import DataFrame
 import numpy as np
 from apscheduler.schedulers.background import BackgroundScheduler
 from mongoengine import Q
-
+from loguru import logger
 # Sample usage:
 # Please run this class, this will start running a scheduler which will Trigger a periodic process to
 # - read the frame wise data
@@ -24,7 +24,7 @@ from mongoengine import Q
 # StudentPulseManager.should_intervene_student_group('5f05f687ed068084942f5791', '101')
 from app.config import get_settings
 from app.db.database import DbMgr
-from app.models.pulse import SessionPulse, SessionPulseStudent
+from app.models.pulse import SessionPulse, SessionPulseStudent, StudentIntervention, StudentGroupIntervention
 from app.models.pulse_events import PulseProcessing
 from app.models.session import Session
 from app.models.student import Student
@@ -38,9 +38,10 @@ class StudentPulseManager:
     SESSION_INTERVENTION_THRESHOLD_ATTENTIVENESS = 0.6
     STUDENT_INTERVENTION_THRESHOLD_ENGAGEMENT = 0.5
     STUDENT_INTERVENTION_THRESHOLD_ATTENTIVENESS = 0.5
+    STUDENT_GROUP_INTERVENTION_THRESHOLD_ATTENTIVENESS = 0.8
     PROCESS_PERIOD_SECONDS = 5
     POLL_PERIOD_SECONDS = 5
-    MAX_PARALLEL_RUNS = 1
+    MAX_PARALLEL_RUNS = 12
     VALID_ACTIVITIES = ['studying', 'writing', 'questioning', 'raising_hand', 'thinking']
 
     @staticmethod
@@ -72,7 +73,7 @@ class StudentPulseManager:
 
     @staticmethod
     def upsert_student_level_engagement(student_id, observed_at, session_id, param):
-        print(student_id, observed_at, session_id, param)
+        # print(student_id, observed_at, session_id, param)
         ssp = SessionPulseStudent.objects(
             Q(student_id=student_id) & Q(session_id=session_id) & Q(observed_at=observed_at))
 
@@ -87,14 +88,13 @@ class StudentPulseManager:
             ssp_obj = ssp.first()
             ssp_obj.engagement = param
             ssp_obj.save()
-        print("engagement", ssp_obj.session_id, ssp_obj.observed_at, ssp_obj.student_id, ssp_obj.engagement)
+        # print("engagement", ssp_obj.session_id, ssp_obj.observed_at, ssp_obj.student_id, ssp_obj.engagement)
 
     @staticmethod
     def upsert_student_level_attentiveness(student_id, observed_at, session, param):
         student = Student.objects(school_id=student_id).first()
-
         if student:
-            print(student_id, observed_at, session, param)
+            # print(student_id, observed_at, session, param)
             ssp = SessionPulseStudent.objects(
                 Q(student=student) & Q(session=session) & Q(datetime_sequence=observed_at))
 
@@ -109,13 +109,13 @@ class StudentPulseManager:
                 ssp_obj = ssp.first()
                 ssp_obj.attentiveness = param
                 ssp_obj.save()
-            print("attentiveness", ssp_obj.session, ssp_obj.datetime_sequence, ssp_obj.student, ssp_obj.attentiveness)
+            # print("attentiveness", ssp_obj.session, ssp_obj.datetime_sequence, ssp_obj.student, ssp_obj.attentiveness)
         else:
             print("Unrecognised student", student_id)
 
     @staticmethod
     def upsert_session_level_engagement(observed_at, session_id, param):
-        print(observed_at, session_id, param)
+        # print(observed_at, session_id, param)
         sp = SessionPulse.objects(Q(session_id=session_id) & Q(observed_at=observed_at))
 
         if not sp:
@@ -128,11 +128,11 @@ class StudentPulseManager:
             sp_obj = sp.first()
             sp_obj.engagement = param
             sp_obj.save()
-        print("engagement", sp_obj.session_id, sp_obj.observed_at, sp_obj.engagement)
+        # print("engagement", sp_obj.session_id, sp_obj.observed_at, sp_obj.engagement)
 
     @staticmethod
     def upsert_session_level_attentiveness(observed_at, session, param):
-        print(observed_at, session, param)
+        # print(observed_at, session, param)
         sp = SessionPulse.objects(Q(session=session) & Q(datetime_sequence=observed_at))
 
         if not sp:
@@ -145,7 +145,7 @@ class StudentPulseManager:
             sp_obj = sp.first()
             sp_obj.attentiveness = param
             sp_obj.save()
-        print("attentiveness", sp_obj.session, sp_obj.datetime_sequence, sp_obj.attentiveness)
+        # print("attentiveness", sp_obj.session, sp_obj.datetime_sequence, sp_obj.attentiveness)
 
     @staticmethod
     def upsert_student_group_level_engagement(observed_at, session_id, student_group_id, param):
@@ -169,7 +169,7 @@ class StudentPulseManager:
 
     @staticmethod
     def upsert_student_group_level_attentiveness(observed_at, session, student_group, param):
-        print(observed_at, session, student_group, param)
+        # print(observed_at, session, student_group, param)
         ssgp = SessionPulse.objects(
             Q(session=session) & Q(datetime_sequence=observed_at) & Q(student_group_name=student_group.name))
 
@@ -184,8 +184,8 @@ class StudentPulseManager:
             ssgp_obj = ssgp.first()
             ssgp_obj.attentiveness = param
             ssgp_obj.save()
-        print("attentiveness", ssgp_obj.session, ssgp_obj.student_group_name, ssgp_obj.datetime_sequence,
-              ssgp_obj.attentiveness)
+        # print("attentiveness", ssgp_obj.session, ssgp_obj.student_group_name, ssgp_obj.datetime_sequence,
+        #       ssgp_obj.attentiveness)
 
     # @staticmethod
     # def calculate_engagement(start_time_of_events):
@@ -258,8 +258,8 @@ class StudentPulseManager:
 
     @staticmethod
     def calculate_attentiveness(start_time_of_events, end_time_of_events):
-        print("start_time_of_events : ", start_time_of_events)
-        print("end_time_of_events : ", end_time_of_events)
+        logger.info(f"start_time_of_events:{start_time_of_events}")
+        logger.info(f"end_time_of_events:{end_time_of_events}")
         pulses = []
         for pulse in PulseProcessing.objects(Q(person_detection_event__detected_at__gte=start_time_of_events) & Q(
                 person_detection_event__detected_at__lt=end_time_of_events)):
@@ -270,6 +270,7 @@ class StudentPulseManager:
         df: DataFrame = pd.DataFrame(pulses)
         # print(df.head())
         StudentPulseManager.calculate_attentiveness_df(df)
+        print("DONE : " + str(start_time_of_events))
 
     @staticmethod
     def calculate_attentiveness_df(df):
@@ -278,11 +279,11 @@ class StudentPulseManager:
             for session in unique_sessions:
                 student_attentiveness_dict = {}
 
-                print("Processing Session ID ", session)
+                # print("Processing Session ID ", session)
                 session_df = df.loc[df['session'] == session]
                 # print(session_df.head())
                 unique_frame_ids = session_df['frame_id'].unique()
-                print("unique frame IDs in the session ", unique_frame_ids)
+                # print("unique frame IDs in the session ", unique_frame_ids)
 
                 session_student_score = {}
                 for frame_id in unique_frame_ids:
@@ -300,7 +301,7 @@ class StudentPulseManager:
 
                     avg_frame_pitch = frame_agg_df['pitch_average'].iloc[0]
                     avg_frame_yaw = frame_agg_df['yaw_average'].iloc[0]
-                    print("Average Frame pitch is: ", avg_frame_pitch, "Average Frame yaw is: ", avg_frame_yaw)
+                    # print("Average Frame pitch is: ", avg_frame_pitch, "Average Frame yaw is: ", avg_frame_yaw)
 
                     for student_id in frame_df['student_id'].unique():
 
@@ -316,28 +317,36 @@ class StudentPulseManager:
                         if pow((student_frame_df['pitch'] - avg_frame_pitch) / 180, 2) + pow(
                                 (student_frame_df['yaw'] - avg_frame_yaw) / 180, 2) > 0.03:
 
-                            print("Frame Id : " + str(frame_id) + " Student Id : " + student_id + " Student's pitch : " +
-                                  str(student_frame_df['pitch']), " Student's yaw : " + str(student_frame_df[
-                                                                                                'yaw']) + " Frame's avg pitch : " + str(
-                                avg_frame_pitch) + " Frame's avg yaw : " + str(avg_frame_yaw))
+                            # print(
+                            #     "Frame Id : " + str(frame_id) + " Student Id : " + student_id + " Student's pitch : " +
+                            #     str(student_frame_df['pitch']), " Student's yaw : " + str(student_frame_df[
+                            #                                                                   'yaw']) + " Frame's avg pitch : " + str(
+                            #         avg_frame_pitch) + " Frame's avg yaw : " + str(avg_frame_yaw))
 
                             # student_attentiveness['un_attentive'] = student_attentiveness['un_attentive'] + 1
 
+                            # tic = time.perf_counter()
                             StudentPulseManager.upsert_student_level_attentiveness(student_id,
                                                                                    student_frame_df['timestamp'],
                                                                                    session, 0)
+                            # toc = time.perf_counter()
+                            # print(f"upsert_student_level_attentiveness in {toc - tic:0.4f} seconds")
+
                             frame_df.loc[frame_df['student_id'] == student_id, 'attentiveness'] = 0
                         else:
+                            # tic = time.perf_counter()
                             StudentPulseManager.upsert_student_level_attentiveness(student_id,
                                                                                    student_frame_df['timestamp'],
                                                                                    session, 1)
+                            # toc = time.perf_counter()
+                            # print(f"upsert_student_level_attentiveness in {toc - tic:0.4f} seconds")
                             frame_df.loc[frame_df['student_id'] == student_id, 'attentiveness'] = 1
 
                             total_session_attentiveness_this_frame = total_session_attentiveness_this_frame + 1
 
                         # student_attentiveness_dict[student_id] = student_attentiveness
                     # updating session level attentiveness
-                    total_students = frame_df['student_id'].unique().size
+                    # total_students = frame_df['student_id'].unique().size
                     # StudentPulseManager.upsert_session_level_attentiveness(frame_df.iloc[0]['timestamp'], session,
                     #                                                        total_session_attentiveness_this_frame / total_students)
 
@@ -350,55 +359,20 @@ class StudentPulseManager:
                             if not frame_df[frame_df['student_id'] == str(student.school_id)].empty:
                                 students_in_frame = students_in_frame + 1
                                 student_grp_attentiveness = student_grp_attentiveness + \
-                                                            frame_df[frame_df['student_id'] == str(student.school_id)].iloc[0][
+                                                            frame_df[
+                                                                frame_df['student_id'] == str(student.school_id)].iloc[
+                                                                0][
                                                                 'attentiveness']
                         if students_in_frame and students_in_frame > 0:
                             StudentPulseManager.upsert_student_group_level_attentiveness(frame_df.iloc[0]['timestamp'],
-                                                                                     session,
-                                                                                     student_group,
-                                                                                     student_grp_attentiveness / students_in_frame)
-
-                # session_unattentiveness = 0
-                # session_total = 0
-                # for student_id in student_attentiveness_dict.keys():
-                #     if student_attentiveness_dict[student_id]:
-                #         student_attentiveness = student_attentiveness_dict[student_id]
-                #         if student_attentiveness['un_attentive'] / student_attentiveness['total'] > 0.4:
-                #             print("raise Student alert")
-                #             print("Student Id : ", student_id)
-                #             print("student_attentiveness['un_attentive']", student_attentiveness['un_attentive'])
-                #             print("student_attentiveness['total']", student_attentiveness['total'])
-                #         session_total += student_attentiveness['total']
-                #         session_unattentiveness += student_attentiveness['un_attentive']
-                #
-                # if session_unattentiveness / session_total > 0.3:
-                #     print("raise session alert")
-                #     print("Session Id : ", session_id)
-                #     print("session_unattentiveness", session_unattentiveness)
-                #     print("session_total", session_total)
-                #
-                # student_groups = StudentPulseManager.get_student_group_to_student_mapping(
-                #     session_df['student_id'].unique())
-                # for student_group in student_groups:
-                #     student_grp_unattentiveness = 0
-                #     student_grp_total_frames = 0
-                #
-                #     for student in student_group.students:
-                #         if student_attentiveness_dict[student.id]:
-                #             student_attentiveness = student_attentiveness_dict[student.id]
-                #             student_grp_total_frames += student_attentiveness['total']
-                #             student_grp_unattentiveness += student_attentiveness['un_attentive']
-                #
-                #     if session_unattentiveness / session_total > 0.35:
-                #         print("raise student group alert")
-                #         print("Student group Id : ", student_group.id)
-                #         print("student_grp_unattentiveness", student_grp_unattentiveness)
-                #         print("student_grp_total_frames", student_grp_total_frames)
+                                                                                         session,
+                                                                                         student_group,
+                                                                                         student_grp_attentiveness / students_in_frame)
 
     @staticmethod
     def should_intervene_session(session, events_start_time, events_end_time):
 
-        min_student_in_session_for_intervention = session.configs.th_min_student_for_int
+        # min_student_in_session_for_intervention = session.configs.th_min_student_for_int
 
         total_attentiveness_pulses = 0
         total_engagement_pulses = 0
@@ -450,29 +424,96 @@ class StudentPulseManager:
             return False
 
     @staticmethod
-    def should_intervene_student_group(student_group_id, session_id, events_start_time, events_end_time):
-        total_attentiveness_pulses = 0
-        total_engagement_pulses = 0
-        total_attentiveness = 0
-        total_engagement = 0
-        for student_group_pulse in SessionStudentGroupPulse.objects(
-                Q(student_group_id=student_group_id) & Q(session_id=session_id) & Q(
-                    observed_at__gte=start_time_of_events)):
-            if student_group_pulse.attentiveness:
-                total_attentiveness += student_group_pulse.attentiveness
-                total_attentiveness_pulses += 1
+    def calculate_student_interventions(events_start_time, events_end_time):
 
-            if student_group_pulse.engagement:
-                total_engagement += student_group_pulse.engagement
-                total_engagement_pulses += 1
+        print(events_start_time)
+        print(events_end_time)
+        student_attentiveness_dict = {}
 
-        if (total_attentiveness_pulses > 0 and (
-                total_attentiveness / total_attentiveness_pulses > StudentPulseManager.STUDENT_INTERVENTION_THRESHOLD_ATTENTIVENESS)) or \
-                (total_engagement_pulses > 0 and (
-                        total_engagement / total_engagement_pulses > StudentPulseManager.STUDENT_INTERVENTION_THRESHOLD_ENGAGEMENT)):
-            return True
-        else:
-            return False
+        for student_pulse in SessionPulseStudent.objects(
+                Q(datetime_sequence__gte=events_start_time) & Q(datetime_sequence__lt=events_end_time)):
+            student = student_pulse.student
+            session = student_pulse.session
+            student_attentiveness = {}
+
+            if session not in student_attentiveness_dict:
+                student_attentiveness_dict[session] = {}
+
+            if student in student_attentiveness_dict[session]:
+                student_attentiveness = student_attentiveness_dict[session][student]
+            else:
+                student_attentiveness['total'] = 0
+                student_attentiveness['attentive'] = 0
+
+            student_attentiveness['total'] = student_attentiveness['total'] + 1
+            student_attentiveness['attentive'] = student_attentiveness['attentive'] + student_pulse.attentiveness
+
+            student_attentiveness_dict[session][student] = student_attentiveness
+
+        print(student_attentiveness_dict)
+
+        for session in student_attentiveness_dict.keys():
+            for student in student_attentiveness_dict[session].keys():
+                student_attentiveness = student_attentiveness_dict[session][student]
+                if student_attentiveness['attentive'] / student_attentiveness[
+                    'total'] <= StudentPulseManager.STUDENT_INTERVENTION_THRESHOLD_ATTENTIVENESS:
+                    si = StudentIntervention()
+                    si.session = session
+                    si.student = student
+                    si.intervention_reason = "ATTENTIVENESS"
+                    si.intervention_period_start = events_start_time
+                    si.intervention_period_end = events_end_time
+                    si.intervention_reason_value = student_attentiveness['attentive'] / student_attentiveness[
+                    'total']
+                    si.intervention_reason_threshold = StudentPulseManager.STUDENT_INTERVENTION_THRESHOLD_ATTENTIVENESS
+                    si.datetime_sequence = events_end_time
+                    si.save()
+
+    @staticmethod
+    def calculate_student_group_interventions(events_start_time, events_end_time):
+        print(events_start_time)
+        print(events_end_time)
+        student_group_attentiveness_dict = {}
+
+        for student_group_pulse in SessionPulse.objects(
+                Q(datetime_sequence__gte=events_start_time) & Q(datetime_sequence__lt=events_end_time)):
+            student_group = student_group_pulse.student_group_name
+            session = student_group_pulse.session
+            student_group_attentiveness = {}
+
+            if session not in student_group_attentiveness_dict:
+                student_group_attentiveness_dict[session] = {}
+
+            if student_group in student_group_attentiveness_dict[session]:
+                student_group_attentiveness = student_group_attentiveness_dict[session][student_group]
+            else:
+                student_group_attentiveness['total'] = 0
+                student_group_attentiveness['attentive'] = 0
+
+            student_group_attentiveness['total'] = student_group_attentiveness['total'] + 1
+            student_group_attentiveness['attentive'] = student_group_attentiveness[
+                                                           'attentive'] + student_group_pulse.attentiveness
+
+            student_group_attentiveness_dict[session][student_group] = student_group_attentiveness
+
+        print(student_group_attentiveness_dict)
+
+        for session in student_group_attentiveness_dict.keys():
+            for student_group in student_group_attentiveness_dict[session].keys():
+                student_group_attentiveness = student_group_attentiveness_dict[session][student_group]
+                if student_group_attentiveness['attentive'] / student_group_attentiveness[
+                    'total'] <= StudentPulseManager.STUDENT_GROUP_INTERVENTION_THRESHOLD_ATTENTIVENESS:
+                    si = StudentGroupIntervention()
+                    si.session = session
+                    si.student_group_name = student_group
+                    si.intervention_reason = "ATTENTIVENESS"
+                    si.intervention_period_start = events_start_time
+                    si.intervention_period_end = events_end_time
+                    si.intervention_reason_value = student_group_attentiveness['attentive'] / student_group_attentiveness[
+                        'total']
+                    si.intervention_reason_threshold = StudentPulseManager.STUDENT_GROUP_INTERVENTION_THRESHOLD_ATTENTIVENESS
+                    si.datetime_sequence = events_end_time
+                    si.save()
 
 
 date_time_str = '2020-08-31 12:00:05'
@@ -488,9 +529,11 @@ def process_pulse():
     # print('Starting processing at : %s' % processing_start_time)
     # print('Counting events from : ' + str(start_time_of_events))
 
-    StudentPulseManager.calculate_attentiveness(start_time_of_events, end_time_of_events)
     # StudentPulseManager.calculate_engagement(start_time_of_events)
-    # StudentPulseManager.should_intervene_student_group(Session, start_time_of_events, processing_start_time)
+
+    # StudentPulseManager.calculate_attentiveness(start_time_of_events, end_time_of_events)
+    StudentPulseManager.calculate_student_interventions(start_time_of_events, end_time_of_events)
+    StudentPulseManager.calculate_student_group_interventions(start_time_of_events, end_time_of_events)
 
 
 def start_svc():
