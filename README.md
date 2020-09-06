@@ -31,5 +31,16 @@ password: foobar
 - Use this connection string : mongodb+srv://tip_user:tip_password@aa.jiqjp.mongodb.net/test
 - Use database indus_1
 
+# Docker containers for grading
+docker pull registry.gitlab.com/n0t0/hermes_containers:allennlp_fact_scorer-v0.0.1_demo
+
+docker pull registry.gitlab.com/n0t0/hermes_containers:allennlp_fact_extractor-v0.0.1_demo
+
+docker run -it -p 32500:5000 registry.gitlab.com/n0t0/hermes_containers:allennlp_fact_extractor-v0.0.1_demo
+
+docker run -it -p 42500:5000 registry.gitlab.com/n0t0/hermes_containers:allennlp_fact_scorer-v0.0.1_demo
+
+
+
 # Caveats
 - As if now, only /users/me end point is under authorization. 
