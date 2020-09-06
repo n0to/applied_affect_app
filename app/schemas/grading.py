@@ -128,6 +128,7 @@ class Assignment(BaseModel):
     deadline: datetime
     klass: KlassWithoutStudentList
     datetime_modified: datetime
+    state: str
     qnas: List[AssignmentQnA] = []
 
     class Config:
