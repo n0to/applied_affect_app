@@ -40,14 +40,6 @@ def get_assignment(id: str, get_qnas: Optional[bool] = False):
     return ass
 
 
-@router.get("/assignment/{id}/qna", response_model=List[AssignmentQnA])
-def get_assignment_qna(id: str):
-    ass_qnas = utils_grading.get_assignment_qnas(assignment=id, get_top_answers=False)
-    if not len(ass_qnas):
-        raise HTTPException(status_code=404, detail="No QnAs found for Assignment")
-    return ass_qnas
-
-
 @router.get("/assignment_qna/{id}", response_model=AssignmentQnAWithTopAnswers)
 def get_assignment_qna(id: str):
     ass_qna = utils_grading.get_assignment_qna(id=id, get_top_answers=True)
