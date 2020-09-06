@@ -1,3 +1,4 @@
+APScheduler==3.6.3
 arrow==0.15.8
 attrs==20.1.0
 base==1.0.4
@@ -24,11 +25,16 @@ Jinja2==2.11.2
 jinja2-time==0.2.0
 loguru==0.5.1
 MarkupSafe==1.1.1
+mkl-fft==1.1.0
+mkl-random==1.1.1
+mkl-service==2.3.0
 mongoengine==0.20.0
 mongomock==3.20.0
 more-itertools==8.4.0
 names==0.3.0
+numpy==1.19.1
 packaging==20.4
+pandas==1.1.1
 passlib==1.7.2
 pluggy==0.13.1
 poyo==0.5.0
@@ -44,6 +50,7 @@ python-dotenv==0.14.0
 python-jose==3.2.0
 python-multipart==0.0.5
 python-slugify==4.0.1
+pytz==2020.1
 PyYAML==5.3.1
 requests==2.24.0
 rsa==4.6
@@ -53,6 +60,7 @@ starlette==0.13.8
 TatSu==5.5.0
 text-unidecode==1.3
 toml==0.10.1
+tzlocal==2.1
 urllib3==1.25.10
 uvicorn==0.11.8
 uvloop==0.14.0
