@@ -73,11 +73,11 @@ class StudentPulseManager:
     @staticmethod
     def upsert_student_level_engagement(student_id, observed_at, session_id, param):
         print(student_id, observed_at, session_id, param)
-        ssp = SessionStudentPulse.objects(
+        ssp = SessionPulseStudent.objects(
             Q(student_id=student_id) & Q(session_id=session_id) & Q(observed_at=observed_at))
 
         if not ssp:
-            ssp_obj = SessionStudentPulse()
+            ssp_obj = SessionPulseStudent()
             ssp_obj.session_id = session_id
             ssp_obj.observed_at = observed_at
             ssp_obj.student_id = student_id

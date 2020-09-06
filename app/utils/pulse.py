@@ -49,8 +49,27 @@ def get_session_pulse(session_id: str, from_datetime: Optional[datetime] = None,
             p = schemas_pulse.SessionPulse.from_orm(sess_pulse)
             pulse.append(p)
     except DoesNotExist:
-        logger.info("No pulse or session exists for session_id: {}".format(session_id))
+        logger.info("No pulse for session exists for session_id: {}".format(session_id))
     return pulse
+
+
+def get_session_interventions(session_id: str, from_datetime: Optional[datetime] = None,
+                              to_datetime: Optional[datetime] = None):
+    logger.debug("Get interventions for session:{} from:{} to {}".format(session_id, from_datetime, to_datetime))
+    interventions = []
+    try:
+        if from_datetime is not None and to_datetime is not None:
+            session_int_itr = models_pulse.SessionPulse.objects(session=session_id,
+                                                                datetime_sequence__lte=to_datetime,
+                                                                datetime_sequence__gte=from_datetime)
+        else:
+            session_int_itr = models_pulse.SessionIntervention.objects(session=session_id)
+        for sess_int in session_int_itr:
+            si = schemas_pulse.SessionIntervention.from_orm(sess_int)
+            interventions.append(si)
+    except DoesNotExist:
+        logger.info("No interventions for session exists for session_id: {}".format(session_id))
+    return interventions
 
 
 def get_session_pulse_student(session_id: str):

@@ -37,3 +37,19 @@ class SessionPulseStudent(Document):
     datetime_sequence = DateTimeField(default=datetime.now())
     version = StringField()
 
+
+class SessionIntervention(Document):
+    session = LazyReferenceField(Session)
+    datetime_created = DateTimeField(default=datetime.now())
+
+    meta = {'allow_inheritance': True}
+
+
+class StudentGroupIntervention(SessionIntervention):
+    name = StringField()
+
+
+class StudentIntervention(SessionIntervention):
+    student = ReferenceField(Student)
+
+

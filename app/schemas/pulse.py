@@ -53,3 +53,24 @@ class SessionPulseAggregated(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class SessionIntervention(BaseModel):
+    datetime_created: Optional[datetime] = datetime.now()
+
+    class Config:
+        orm_mode = True
+
+
+class StudentGroupIntervention(SessionIntervention):
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class StudentIntervention(SessionIntervention):
+    student: Student
+
+    class Config:
+        orm_mode = True
