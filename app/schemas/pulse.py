@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -57,13 +57,23 @@ class SessionPulseAggregated(BaseModel):
 
 class SessionIntervention(BaseModel):
     datetime_created: Optional[datetime] = datetime.now()
+    datetime_sequence: Optional[datetime] = datetime.now()
+    version: Optional[str] = None
+    intervention_reason: str
+    intervention_period_start: datetime
+    intervention_period_end: datetime
+    intervention_reason_value: float
+    intervention_reason_threshold: float
+    student_group_name: Optional[str] = None
+    student: Optional[Student] = None
+    type: str = Field(alias='_cls')
 
     class Config:
         orm_mode = True
 
 
 class StudentGroupIntervention(SessionIntervention):
-    name: str
+    student_group_name: str
 
     class Config:
         orm_mode = True
@@ -71,6 +81,13 @@ class StudentGroupIntervention(SessionIntervention):
 
 class StudentIntervention(SessionIntervention):
     student: Student
+
+    class Config:
+        orm_mode = True
+
+
+class SessionInterventionOut(BaseModel):
+    intervention: Union[StudentIntervention, StudentGroupIntervention]
 
     class Config:
         orm_mode = True

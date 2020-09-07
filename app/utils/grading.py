@@ -9,7 +9,7 @@ import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
 import app.models.school as models_school
 from app.config import get_settings, Settings
-from app.models.enums import Grade, Section, Subject, AssignmentState
+from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState
 
 
 def get_assignment(id: str, get_qnas: bool = False):
@@ -25,7 +25,6 @@ def get_assignment(id: str, get_qnas: bool = False):
                 out_ass.qnas.append(schemas_grading.AssignmentQnA.from_orm(aqna))
     except DoesNotExist:
         logger.info("No assignment exists with id: {}".format(id))
-    logger.debug("Returning output now", out_ass)
     return out_ass
 
 
@@ -70,17 +69,6 @@ def search_assignments(max_records: PositiveInt, **kwargs):
 
 
 # Todo: Implement
-def get_assignment_qna(get_top_answers: bool, id: Optional[str] = None, assignment: Optional[str] = None):
-    out_ass_qna = []
-    logger.debug("")
-    try:
-        pass
-    except DoesNotExist:
-        logger.info("No assignment qna exists with given criteria")
-    return out_ass_qna
-
-
-# Todo: Implement
 def post_qna_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
     pass
 
@@ -122,7 +110,7 @@ def get_assignment_num_questions(ass_id: str):
     pass
 
 
-def get_facts(content: str, metadata: dict, settings: Optional[Settings]=None):
+def get_facts(content: str, metadata: dict, settings: Optional[Settings] = None):
     if settings is None: settings = get_settings()
     endpoint = "{}/predict".format(settings.svc_fact_extraction)
     logger.debug("Hitting endpoint for fact extraction: {}".format(endpoint))
@@ -149,7 +137,7 @@ def get_facts(content: str, metadata: dict, settings: Optional[Settings]=None):
 
 
 def compare_facts(base_facts: [schemas_grading.FactContent], answer_facts: List[schemas_grading.FactContent], metadata,
-                  settings: Optional[Settings]= None):
+                  settings: Optional[Settings] = None):
     if settings is None: settings = get_settings()
     endpoint = "{}/predict".format(settings.svc_fact_comparison)
     logger.debug("Hitting endpoint for fact comparison: {}".format(endpoint))
@@ -180,3 +168,21 @@ def compare_facts(base_facts: [schemas_grading.FactContent], answer_facts: List[
     return similarity
 
 
+def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None):
+    out_submissions = []
+    logger.debug("Getting qna submissions with aqna: {} and student: {}".format(aqna_id, student_id))
+    try:
+        if student_id is None:
+            submissions_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id,
+                                                                             state=SubmissionState.Submitted)
+        else:
+            submissions_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id,
+                                                                             state=SubmissionState.Submitted,
+                                                                             student=student_id)
+        for sub in submissions_itr:
+            logger.bind(payload=sub.to_mongo()).debug("From mongo")
+            out_sub = schemas_grading.AssignmentQnASubmission.from_orm(sub)
+            out_submissions.append(out_sub)
+    except DoesNotExist:
+        logger.info("No submissions exists for aqna: {} and student: {}".format(aqna_id, student_id))
+    return out_submissions

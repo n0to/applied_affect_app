@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 
 import app.utils.pulse as utils_pulse
 from app.schemas.pulse import SessionAttendanceAggregated, SessionPulse, SessionPulseStudent, SessionPulseAggregated, \
-    SessionAttendance, StudentIntervention, StudentGroupIntervention
+    SessionAttendance, StudentIntervention, StudentGroupIntervention, SessionIntervention, SessionInterventionOut
 
 router = APIRouter()
 
@@ -50,7 +50,7 @@ def get_session_student_pulse(id: str):
     return session_pulse_student
 
 
-@router.get("/session/{id}/interventions", response_model=List[Union[StudentIntervention, StudentGroupIntervention]])
+@router.get("/session/{id}/interventions", response_model=List[SessionIntervention])
 def get_session_interventions(id: str, from_datetime: Optional[datetime] = None, to_datetime: Optional[datetime] = None):
     session_interventions = utils_pulse.get_session_interventions(session_id=id, from_datetime=from_datetime, to_datetime=to_datetime)
     if not len(session_interventions):
