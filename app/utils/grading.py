@@ -9,7 +9,7 @@ import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
 import app.models.school as models_school
 from app.config import get_settings, Settings
-from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState
+from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState, ErrorCodes, ScoringState
 
 
 def get_assignment(id: str, get_qnas: bool = False):
@@ -133,7 +133,9 @@ def get_assignment_num_questions(ass_id: str):
     pass
 
 
-def get_facts(content: str, metadata: dict, settings: Optional[Settings] = None):
+def get_facts(content: str,
+              metadata: dict = {},
+              settings: Optional[Settings] = None):
     if settings is None: settings = get_settings()
     endpoint = "{}/predict".format(settings.svc_fact_extraction)
     logger.debug("Hitting endpoint for fact extraction: {}".format(endpoint))
@@ -162,7 +164,9 @@ def get_facts(content: str, metadata: dict, settings: Optional[Settings] = None)
     return out_facts
 
 
-def compare_facts(base_facts: [schemas_grading.FactContent], answer_facts: List[schemas_grading.FactContent], metadata,
+def compare_facts(base_facts: List[schemas_grading.FactContent],
+                  answer_facts: List[schemas_grading.FactContent],
+                  metadata: dict = {},
                   settings: Optional[Settings] = None):
     if settings is None: settings = get_settings()
     endpoint = "{}/predict".format(settings.svc_fact_comparison)
@@ -192,9 +196,9 @@ def compare_facts(base_facts: [schemas_grading.FactContent], answer_facts: List[
             similarity = resp.json()['data'][0]['output']['model_output']['data']['similarity']
         except requests.exceptions.ConnectionError:
             logger.error("Fact comparison service is down")
-            similarity = -1000
+            similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
     else:
-        similarity = -1000
+        similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
     return similarity
 
 
@@ -216,3 +220,33 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
     except DoesNotExist:
         logger.info("No submissions exists for aqna: {} and student: {}".format(aqna_id, student_id))
     return out_submissions
+
+
+def trigger_scoring(aqna_id: str):
+    logger.debug("Triggering scoring for aqna: {}".format(aqna_id))
+    aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id)
+    aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
+    base_facts = aqna.base_facts
+    base_fact_list = []
+    for f in base_facts:
+        base_fact_list.append(schemas_grading.FactContent.from_orm(f))
+    num_scored = 0
+    for aqnas in aqnas_itr:
+        answer_facts = aqnas.answer.facts
+        answer_fact_list = []
+        for f in answer_facts:
+            answer_fact_list.append(schemas_grading.FactContent.from_orm(f))
+        similarity = compare_facts(base_fact_list)
+        if similarity == ErrorCodes.SIMILARITY_UNAVAILABLE:
+            state = ScoringState.Unavailable
+            score = ErrorCodes.SIMILARITY_UNAVAILABLE
+        else:
+            score = round(similarity.aqna.max_score * similarity)
+            state = ScoringState.Scored
+        aqnas.score = score
+        aqnas.scoring_state = state
+        aqnas.save()
+        num_scored = num_scored + 1
+    logger.debug("Scored {} submissions for aqna: {}".format(num_scored, aqna_id))
+    return num_scored
+

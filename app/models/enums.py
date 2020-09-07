@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+class ErrorCodes(int, Enum):
+    SIMILARITY_UNAVAILABLE = -1000
+
+
 class ScoringState(str, Enum):
     Scored = "Scored",
     Pending = "Pending",
