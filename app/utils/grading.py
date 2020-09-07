@@ -222,31 +222,38 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
     return out_submissions
 
 
-def trigger_scoring(aqna_id: str):
+def trigger_scoring(aqna_id: str, student_id: Optional[str] = None):
     logger.debug("Triggering scoring for aqna: {}".format(aqna_id))
-    aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id)
-    aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
-    base_facts = aqna.base_facts
-    base_fact_list = []
-    for f in base_facts:
-        base_fact_list.append(schemas_grading.FactContent.from_orm(f))
     num_scored = 0
-    for aqnas in aqnas_itr:
-        answer_facts = aqnas.answer.facts
-        answer_fact_list = []
-        for f in answer_facts:
-            answer_fact_list.append(schemas_grading.FactContent.from_orm(f))
-        similarity = compare_facts(base_fact_list)
-        if similarity == ErrorCodes.SIMILARITY_UNAVAILABLE:
-            state = ScoringState.Unavailable
-            score = ErrorCodes.SIMILARITY_UNAVAILABLE
+    try:
+        if student_id is None:
+            aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id)
         else:
-            score = round(similarity.aqna.max_score * similarity)
-            state = ScoringState.Scored
-        aqnas.score = score
-        aqnas.scoring_state = state
-        aqnas.save()
-        num_scored = num_scored + 1
+            aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id, student=student_id)
+
+        aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
+        base_facts = aqna.base_facts
+        base_fact_list = []
+        for f in base_facts:
+            base_fact_list.append(schemas_grading.FactContent.from_orm(f))
+        for aqnas in aqnas_itr:
+            answer_facts = aqnas.answer.facts
+            answer_fact_list = []
+            for f in answer_facts:
+                answer_fact_list.append(schemas_grading.FactContent.from_orm(f))
+            similarity = compare_facts(base_fact_list)
+            if similarity == ErrorCodes.SIMILARITY_UNAVAILABLE:
+                state = ScoringState.Unavailable
+                score = ErrorCodes.SIMILARITY_UNAVAILABLE
+            else:
+                score = round(similarity.aqna.max_score * similarity)
+                state = ScoringState.Scored
+            aqnas.score = score
+            aqnas.scoring_state = state
+            aqnas.save()
+            num_scored = num_scored + 1
+    except DoesNotExist:
+        logger.info("No submissions or aqna exists for aqna_id:{} and student {}".format(aqna_id, student_id))
     logger.debug("Scored {} submissions for aqna: {}".format(num_scored, aqna_id))
     return num_scored
 
