@@ -55,7 +55,7 @@ class AnsContent(BaseModel):
 
 class SubjAnsContent(AnsContent):
     answer: str
-    facts: Optional[List[FactContentWithoutSerializedFacts]] = None
+    facts: Optional[List[FactContentWithoutSerializedFacts]] = []
 
     class Config:
         orm_mode = True
@@ -145,14 +145,23 @@ class Assignment(BaseModel):
         orm_mode = True
 
 
-class AssignmentQnASubmission(BaseModel):
+class AssignmentQnASubmissionCreate(BaseModel):
+    answer: Union[ObjAnsContent, SubjAnsContent]
+    state: SubmissionState
+
+    class Config:
+        orm_mode = True
+
+
+class AssignmentQnASubmission(AssignmentQnASubmissionCreate):
     id: ObjectIdStr
     student: Student
-    answer: Union[SubjAnsContent, ObjAnsContent]
     datetime_modified: datetime
-    score: int
-    state: SubmissionState
+    score: Optional[int]
     scoring_state: ScoringState
 
     class Config:
         orm_mode = True
+
+
+

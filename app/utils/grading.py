@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Union
 
 from bson import ObjectId
 import requests
@@ -69,8 +69,31 @@ def search_assignments(max_records: PositiveInt, **kwargs):
 
 
 # Todo: Implement
-def post_qna_submission(aqna_id: str, s_id: str, answer: schemas_grading.AnsContent):
-    pass
+def post_qna_submission(aqna_id: str, s_id: str,
+                        submission: schemas_grading.AssignmentQnASubmissionCreate):
+    logger.bind(payload=submission.dict()).debug("Posting aqna:{} for student: {}".format(aqna_id, s_id))
+    logger.debug("Answer is of type: {}".format(type(submission.answer)))
+    assignment = models_grading.AssignmentQnA.objects.only('id').get(id=aqna_id)
+    if isinstance(submission.answer, schemas_grading.SubjAnsContent):
+        logger.debug("Subjective answer detected")
+        if submission.state == SubmissionState.Submitted:
+            metadata = {}
+            facts = get_facts(content=submission.answer.answer, metadata=metadata)
+            submission.answer.facts = facts
+        ans = models_grading.SubjAnsContent(**submission.answer.dict())
+    elif isinstance(submission.answer, schemas_grading.ObjAnsContent):
+        logger.debug("Objective answer detected")
+        ans = models_grading.ObjAnsContent(**submission.answer.dict())
+    else:
+        raise NotImplemented("Unknown answer type detected")
+    num_updated = models_grading.AssignmentQnASubmission.objects(student=s_id,
+                                                                 aqna=aqna_id,
+                                                                 assignment=str(assignment.id)).update_one(
+        answer=ans,
+        state=submission.state,
+        upsert=True
+    )
+    return num_updated
 
 
 def update_assignment_qna_facts(id: str, ans_content_list: List[schemas_grading.SubjAnsContent]):
@@ -127,12 +150,15 @@ def get_facts(content: str, metadata: dict, settings: Optional[Settings] = None)
         }
 
     }
-    resp = requests.post(endpoint, json=payload)
-    facts = resp.json()['data'][0]["output"]["model_output"]["data"]["facts"]
     out_facts = []
-    for f in facts:
-        fc = schemas_grading.FactContent(**f)
-        out_facts.append(fc)
+    try:
+        resp = requests.post(endpoint, json=payload)
+        facts = resp.json()['data'][0]["output"]["model_output"]["data"]["facts"]
+        for f in facts:
+            fc = schemas_grading.FactContent(**f)
+            out_facts.append(fc)
+    except requests.exceptions.ConnectionError:
+        logger.error("Fact extraction service is down")
     return out_facts
 
 
@@ -161,8 +187,12 @@ def compare_facts(base_facts: [schemas_grading.FactContent], answer_facts: List[
                 "meta": metadata
             }
         }
-        resp = requests.post(endpoint, json=payload)
-        similarity = resp.json()['data'][0]['output']['model_output']['data']['similarity']
+        try:
+            resp = requests.post(endpoint, json=payload)
+            similarity = resp.json()['data'][0]['output']['model_output']['data']['similarity']
+        except requests.exceptions.ConnectionError:
+            logger.error("Fact comparison service is down")
+            similarity = -1000
     else:
         similarity = -1000
     return similarity

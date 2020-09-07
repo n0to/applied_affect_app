@@ -1,12 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, HTTPException
 from pydantic import PositiveInt
 
 import app.utils.grading as utils_grading
 from app.models.enums import Subject, Grade, Section, AssignmentState
-from app.schemas.grading import Assignment, AssignmentQnAWithBaseFacts, AssignmentQnASubmission
+from app.schemas.grading import Assignment, AssignmentQnAWithBaseFacts, AssignmentQnASubmission, SubjAnsContent, \
+    ObjAnsContent, AssignmentQnASubmissionCreate
 
 router = APIRouter()
 
@@ -55,14 +56,6 @@ def update_assignment_qna_facts(id: str, facts: List[Any]):
     return resp
 
 
-@router.post("/assignment_qna/{aqna_id}/student/{s_id}/submission")
-def post_submission(aqna_id: str, s_id: str, answer: SubjAnsContent):
-    resp = utils_grading.post_qna_submission(aqna_id, s_id, answer)
-    if not resp:
-        raise HTTPException("Couldn't update assignment_qna student submission")
-    return resp
-
-
 @router.put('/assignment_qna_submission/{id}/facts')
 def update_assignment_submission_facts(id: str, ans_content: List[AnsContent]):
     resp = utils_grading.update_assignment_qna_submission_facts(id, ans_content)
@@ -79,3 +72,10 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
         raise HTTPException("Couldn't find any submissions for the assignment")
     return resp
 
+
+@router.post("/assignment_qna/{aqna_id}/student/{s_id}/submission", response_model=int)
+def post_submission(aqna_id: str, s_id: str, submission: AssignmentQnASubmissionCreate):
+    num_updated = utils_grading.post_qna_submission(aqna_id, s_id, submission)
+    if not num_updated:
+        raise HTTPException("Couldn't update assignment_qna student submission")
+    return num_updated

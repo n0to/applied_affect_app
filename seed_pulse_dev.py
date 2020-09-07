@@ -287,7 +287,7 @@ def seed_future_classes(db, fake):
 
     year = '2020'
     month = 9
-    seed_day = 1
+    seed_day = 7
     for day_delta in range(1, 6):
         for hour in range(8, 14):
             e_hour = hour + 1
