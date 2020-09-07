@@ -1,15 +1,14 @@
-from typing import Optional, List, Any, Union
+from typing import Optional, List
 
 from bson import ObjectId
-import requests
 from loguru import logger
-from mongoengine import DoesNotExist, DynamicField
+from mongoengine import DoesNotExist
 from pydantic import PositiveInt
 import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
 import app.models.school as models_school
-from app.config import get_settings, Settings
-from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState, ErrorCodes, ScoringState
+from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState, ScoringState
+from app.utils.facts import get_facts
 
 
 def get_assignment(id: str, get_qnas: bool = False):
@@ -106,14 +105,6 @@ def update_assignment_qna_facts(id: str, ans_content_list: List[schemas_grading.
     return num_updated
 
 
-def update_assignment_qna_submission_facts(id: str, facts: List[Any]):
-    logger.bind(payload=facts).debug("Updating AQNA Submission {} with facts: ".format(id))
-    aqnas = models_grading.AssignmentQnASubmission.objects.get(id=id)
-    aqnas.answer.facts = facts
-    aqnas.save()
-    return 1
-
-
 # Todo: Implement
 def is_submission_for_qna_complete(aqna_id: str):
     pass
@@ -133,76 +124,6 @@ def get_assignment_num_questions(ass_id: str):
     pass
 
 
-def get_facts(content: str,
-              metadata: dict = {},
-              settings: Optional[Settings] = None):
-    if settings is None: settings = get_settings()
-    endpoint = "{}/predict".format(settings.svc_fact_extraction)
-    logger.debug("Hitting endpoint for fact extraction: {}".format(endpoint))
-    payload = {
-        "pipeline_run_id": "",
-        "pipeline_version": "",
-        "pipeline_id": "",
-        "data": {
-            "client_req_id": settings.app_name,
-            "body": {
-                "text_content": content
-            },
-            "meta": metadata
-        }
-
-    }
-    out_facts = []
-    try:
-        resp = requests.post(endpoint, json=payload)
-        facts = resp.json()['data'][0]["output"]["model_output"]["data"]["facts"]
-        for f in facts:
-            fc = schemas_grading.FactContent(**f)
-            out_facts.append(fc)
-    except requests.exceptions.ConnectionError:
-        logger.error("Fact extraction service is down")
-    return out_facts
-
-
-def compare_facts(base_facts: List[schemas_grading.FactContent],
-                  answer_facts: List[schemas_grading.FactContent],
-                  metadata: dict = {},
-                  settings: Optional[Settings] = None):
-    if settings is None: settings = get_settings()
-    endpoint = "{}/predict".format(settings.svc_fact_comparison)
-    logger.debug("Hitting endpoint for fact comparison: {}".format(endpoint))
-    base_fact_list = []
-    for fact in base_facts:
-        base_fact_list.append(fact.dict())
-    ans_fact_list = []
-    for fact in answer_facts:
-        ans_fact_list.append(fact.dict())
-    if len(ans_fact_list) > 0 and len(base_fact_list) > 0:
-        payload = {
-            "pipeline_run_id": "",
-            "pipeline_version": "",
-            "pipeline_id": "",
-            "data": {
-                "client_req_id": settings.app_name,
-                "body": {
-                    "base_facts": base_fact_list,
-                    "answer_facts": ans_fact_list
-                },
-                "meta": metadata
-            }
-        }
-        try:
-            resp = requests.post(endpoint, json=payload)
-            similarity = resp.json()['data'][0]['output']['model_output']['data']['similarity']
-        except requests.exceptions.ConnectionError:
-            logger.error("Fact comparison service is down")
-            similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
-    else:
-        similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
-        logger.debug("Length base_facts:{} answer_facts:{}".format(len(base_fact_list), len(ans_fact_list)))
-    return similarity
-
-
 def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None):
     out_submissions = []
     logger.debug("Getting qna submissions with aqna: {} and student: {}".format(aqna_id, student_id))
@@ -215,7 +136,6 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
                                                                              state=SubmissionState.Submitted,
                                                                              student=student_id)
         for sub in submissions_itr:
-            logger.bind(payload=sub.to_mongo()).debug("From mongo")
             out_sub = schemas_grading.AssignmentQnASubmission.from_orm(sub)
             out_submissions.append(out_sub)
     except DoesNotExist:
@@ -223,38 +143,49 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
     return out_submissions
 
 
-def trigger_scoring(aqna_id: str, student_id: Optional[str] = None):
-    logger.debug("Triggering scoring for aqna: {} student {}".format(aqna_id, student_id))
-    num_scored = 0
+def get_assignment_qna(id: str):
+    logger.debug("Get assignment qna: {}".format(id))
+    out_assqna = None
     try:
-        if student_id is None:
-            aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id)
-        else:
-            aqnas_itr = models_grading.AssignmentQnASubmission.objects(aqna=aqna_id, student=student_id)
-
-        aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
-        base_facts = aqna.base_facts
-        base_fact_list = []
-        for f in base_facts:
-            base_fact_list.append(schemas_grading.FactContent.from_orm(f))
-        for aqnas in aqnas_itr:
-            answer_facts = aqnas.answer.facts
-            answer_fact_list = []
-            for f in answer_facts:
-                answer_fact_list.append(schemas_grading.FactContent.from_orm(f))
-            similarity = compare_facts(base_facts=base_fact_list, answer_facts=answer_fact_list)
-            if similarity == ErrorCodes.SIMILARITY_UNAVAILABLE:
-                state = ScoringState.Unavailable
-                score = ErrorCodes.SIMILARITY_UNAVAILABLE
-            else:
-                score = round(aqna.max_score * similarity)
-                state = ScoringState.Scored
-            aqnas.score = score
-            aqnas.scoring_state = state
-            aqnas.save()
-            num_scored = num_scored + 1
+        assqna = models_grading.AssignmentQnA.objects.get(id=id)
+        out_assqna = schemas_grading.AssignmentQnA.from_orm(assqna)
     except DoesNotExist:
-        logger.info("No submissions or aqna exists for aqna_id:{} and student {}".format(aqna_id, student_id))
-    logger.debug("Scored {} submissions for aqna: {}".format(num_scored, aqna_id))
-    return num_scored
+        logger.info("No assignment qna exists with id: {}".format(id))
+    return out_assqna
 
+
+def modify_assqna_base_facts(aqna_id: str, base_fact_list: List[schemas_grading.FactContentWithoutSerializedFacts]):
+    logger.bind(payload=base_fact_list).debug("Updating assqna {} with base_facts scores".format(aqna_id))
+    try:
+        aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
+        fact_hash = {}
+        for fact in base_fact_list:
+            fact_hash[fact.fact_id] = fact
+        num_updated = 0
+        for fact in aqna.base_facts:
+            if fact.fact_id in fact_hash.keys():
+                logger.debug("Resetting score for fact {} with {}".format(fact.fact_id, fact_hash[fact.fact_id].score))
+                fact.score = fact_hash[fact.fact_id].score
+                num_updated = num_updated + 1
+        aqna.save()
+    except DoesNotExist:
+        logger.info("No Assignment QnA exists with id {}".format(aqna_id))
+    return
+
+
+def modify_assqna_submission_scores(id: str, scoring_update: schemas_grading.AssignmentQnASubmissionScoringUpdate):
+    logger.bind(payload=scoring_update.dict()).debug("Updating scores for submission id {}".format(id))
+    num_updated = 0
+    try:
+        submission = models_grading.AssignmentQnASubmission.objects.get(id=id)
+        if submission.final_similarity is not None:
+            submission.final_similarity = scoring_update.final_similarity
+        if scoring_update.score is not None:
+            submission.score = scoring_update.score
+            submission.scoring_state = ScoringState.Scored
+        logger.debug(submission.to_mongo())
+        submission.save()
+        num_updated = num_updated + 1
+    except DoesNotExist:
+        logger.info("No such submission exists with id : {}".format(id))
+    return num_updated

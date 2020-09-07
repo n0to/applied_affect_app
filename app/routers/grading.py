@@ -4,10 +4,12 @@ from typing import List, Optional, Union
 from fastapi import APIRouter, HTTPException
 from pydantic import PositiveInt
 
+import app.utils.facts
 import app.utils.grading as utils_grading
 from app.models.enums import Subject, Grade, Section, AssignmentState
 from app.schemas.grading import Assignment, AssignmentQnAWithBaseFacts, AssignmentQnASubmission, SubjAnsContent, \
-    ObjAnsContent, AssignmentQnASubmissionCreate
+    ObjAnsContent, AssignmentQnASubmissionCreate, FactContentWithoutSerializedFacts, \
+    AssignmentQnASubmissionScoringUpdate
 
 router = APIRouter()
 
@@ -42,9 +44,9 @@ def get_assignment(id: str, get_qnas: Optional[bool] = False):
 
 @router.get("/assignment_qna/{id}", response_model=AssignmentQnAWithBaseFacts)
 def get_assignment_qna(id: str):
-    ass_qna = utils_grading.get_assignment_qna(id=id, get_top_answers=True)
-    if not len(ass_qna):
-        raise HTTPException(status_code=404, detail="No QnAs found")
+    ass_qna = utils_grading.get_assignment_qna(id=id)
+    if not ass_qna:
+        raise HTTPException(status_code=404, detail="No assignment qna found")
     return ass_qna
 
 
@@ -86,5 +88,18 @@ def post_submission(aqna_id: str, s_id: str, submission: AssignmentQnASubmission
 # Todo: Move this to a background job
 @router.get("/assignment_qna/{aqna_id}/score", response_model=bool)
 def trigger_scoring(aqna_id: str, s_id: Optional[str] = None):
-    num_scored = utils_grading.trigger_scoring(aqna_id=aqna_id, student_id=s_id)
+    num_scored = app.utils.facts.trigger_scoring(aqna_id=aqna_id, student_id=s_id)
     return num_scored
+
+
+@router.put("/assignment_qna/{aqna_id}/base_fact_scores", response_model=int)
+def modify_assqna_base_facts(aqna_id: str, base_fact_list: List[FactContentWithoutSerializedFacts]):
+    num_updated = utils_grading.modify_assqna_base_facts(aqna_id=aqna_id, base_fact_list=base_fact_list)
+    return num_updated
+
+
+@router.put("/assignment_qna_submission/{id}/scores", response_model=int)
+def modify_assqna_submission_scores(id: str, scoring_update: AssignmentQnASubmissionScoringUpdate):
+    num_updated = utils_grading.modify_assqna_submission_scores(id=id, scoring_update=scoring_update)
+    return num_updated
+

@@ -1,3 +1,4 @@
+import app.utils.facts
 from app.models.pulse import *
 from app.models.school import *
 from app.models.session import *
@@ -179,7 +180,7 @@ def seed_assignments_questions(settings):
         for qna in subj_qnas:
             latest_version = qna.content[0].version
             # get facts here
-            facts = utils_grading.get_facts(content=qna.content[0].answer, metadata={}, settings=settings)
+            facts = app.utils.facts.get_facts(content=qna.content[0].answer, metadata={}, settings=settings)
             efacts = []
             for f in facts:
                 efact = FactContent(**f.dict())
@@ -218,7 +219,7 @@ def seed_submissions(settings):
             for qna, val in questions.items():
                 aqna_id = ques_hash[qna]
                 ans = val['A']
-                facts = utils_grading.get_facts(content=ans, metadata={}, settings=settings)
+                facts = app.utils.facts.get_facts(content=ans, metadata={}, settings=settings)
                 efacts = []
                 for f in facts:
                     efact = FactContent(**f.dict())
@@ -238,29 +239,10 @@ def score_submissions(settings):
     print("***************************************************")
     saqnas = AssignmentQnASubmission.objects()
     for saqna in saqnas:
-        base_facts = saqna.aqna.base_facts
-        answer_facts = saqna.answer.facts
-        max_score = saqna.aqna.max_score
-        base_fact_list = []
-        ans_fact_list = []
-        for f in base_facts:
-            base_fact_list.append(schemas_grading.FactContent.from_orm(f))
-        for f in answer_facts:
-            ans_fact_list.append(schemas_grading.FactContent.from_orm(f))
-
-        similarity = utils_grading.compare_facts(base_facts=base_fact_list,
-                                                 answer_facts=ans_fact_list,
-                                                 metadata={},
-                                                 settings=settings)
-        if similarity == -1000:
-            state = ScoringState.Unavailable
-            pp.pprint("$$$$$$$ CANT DO $$$$$$$$$")
-        else:
-            state = ScoringState.Scored
-            saqna.score = similarity * max_score
-        saqna.scoring_state = state
-        #pp.pprint(saqna.to_mongo())
-        saqna.save()
+        aqna_id = saqna.aqna.id
+        student_id = saqna.student.id
+        print("Triggering scoring for {} {}".format(aqna_id, student_id))
+        app.utils.facts.trigger_scoring(aqna_id=aqna_id, student_id=student_id, settings=settings)
 
 
 main()

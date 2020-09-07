@@ -2,6 +2,8 @@ import unittest
 from random import random
 
 import requests
+
+import app.utils.facts
 from app.config import get_settings
 from app.db.database import DbMgr
 import app.schemas.grading as schemas_grading
@@ -71,7 +73,7 @@ class TestMongo(unittest.TestCase):
         answer = qnasub.qna.content[0].answer
         meta = {
         }
-        facts = utils_grading.get_facts(answer, meta)
+        facts = app.utils.facts.get_facts(answer, meta)
         pp.pprint(facts)
 
     def test_get_scoring(self):

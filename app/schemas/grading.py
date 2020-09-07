@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Union
+from typing import List, Optional, Any, Union, Dict
 
 from pydantic import BaseModel, PositiveInt
 from datetime import datetime
@@ -12,9 +12,10 @@ from app.schemas.mongo_helpers import ObjectIdStr
 
 
 class FactContentWithoutSerializedFacts(BaseModel):
-    fact: str
-    sentence: str
-    score: Optional[int]
+    fact_id: Optional[int] = None
+    fact: Optional[str] = None
+    sentence: Optional[str] = None
+    score: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -159,9 +160,17 @@ class AssignmentQnASubmission(AssignmentQnASubmissionCreate):
     datetime_modified: datetime
     score: Optional[int]
     scoring_state: ScoringState
+    model_similarity: Dict[str, float] = None
+    final_similarity: Dict[str, float] = None
 
     class Config:
         orm_mode = True
 
 
+class AssignmentQnASubmissionScoringUpdate(BaseModel):
+    final_similarity: Dict[str, float] = None
+    score: Optional[int] = None
+
+    class Config:
+        orm_mode = True
 
