@@ -199,6 +199,7 @@ def compare_facts(base_facts: List[schemas_grading.FactContent],
             similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
     else:
         similarity = ErrorCodes.SIMILARITY_UNAVAILABLE
+        logger.debug("Length base_facts:{} answer_facts:{}".format(len(base_fact_list), len(ans_fact_list)))
     return similarity
 
 
@@ -223,7 +224,7 @@ def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None
 
 
 def trigger_scoring(aqna_id: str, student_id: Optional[str] = None):
-    logger.debug("Triggering scoring for aqna: {}".format(aqna_id))
+    logger.debug("Triggering scoring for aqna: {} student {}".format(aqna_id, student_id))
     num_scored = 0
     try:
         if student_id is None:
@@ -241,12 +242,12 @@ def trigger_scoring(aqna_id: str, student_id: Optional[str] = None):
             answer_fact_list = []
             for f in answer_facts:
                 answer_fact_list.append(schemas_grading.FactContent.from_orm(f))
-            similarity = compare_facts(base_fact_list)
+            similarity = compare_facts(base_facts=base_fact_list, answer_facts=answer_fact_list)
             if similarity == ErrorCodes.SIMILARITY_UNAVAILABLE:
                 state = ScoringState.Unavailable
                 score = ErrorCodes.SIMILARITY_UNAVAILABLE
             else:
-                score = round(similarity.aqna.max_score * similarity)
+                score = round(aqna.max_score * similarity)
                 state = ScoringState.Scored
             aqnas.score = score
             aqnas.scoring_state = state

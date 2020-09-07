@@ -47,6 +47,7 @@ def get_assignment_qna(id: str):
         raise HTTPException(status_code=404, detail="No QnAs found")
     return ass_qna
 
+
 ''' 
 @router.put("/assignment_qna/{id}/facts")
 def update_assignment_qna_facts(id: str, facts: List[Any]):
@@ -79,3 +80,11 @@ def post_submission(aqna_id: str, s_id: str, submission: AssignmentQnASubmission
     if not num_updated:
         raise HTTPException("Couldn't update assignment_qna student submission")
     return num_updated
+
+
+# This shouldn't be a GET. There is no other appropriate verb for it.
+# Todo: Move this to a background job
+@router.get("/assignment_qna/{aqna_id}/score", response_model=bool)
+def trigger_scoring(aqna_id: str, s_id: Optional[str] = None):
+    num_scored = utils_grading.trigger_scoring(aqna_id=aqna_id, student_id=s_id)
+    return num_scored
