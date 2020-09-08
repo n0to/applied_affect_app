@@ -52,7 +52,7 @@ def main():
     # seed_assignments()
     # seed_assignments_questions(settings)
     # seed_submissions(settings)
-    score_submissions(settings)
+    # score_submissions(settings)
     # database.DbMgr.disconnect()
 
 
@@ -78,7 +78,7 @@ def read_vars():
     klasses_itr = Klass.objects()
     for k in klasses_itr:
         klasses.append(k)
-    with open(r'subj_quest.yaml') as file:
+    with open(r'dummy_data/subj_quest.yaml') as file:
         print("***************************************************")
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
@@ -86,7 +86,7 @@ def read_vars():
         for k, v in subj_data.items():
             print(k, v)
 
-    with open(r'obj_quest.yaml') as file:
+    with open(r'dummy_data/obj_quest.yaml') as file:
         print("***************************************************")
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
@@ -202,7 +202,7 @@ def seed_submissions(settings):
     aqnas = AssignmentQnA.objects(assignment=str(ass.id))
     print("QNAS:", aqnas)
     students = ass.klass.members
-    submission_dir = "/home/neo/Downloads/submission/"
+    submission_dir = "dummy_data/submission/"
     ques_hash = {}
     for aqna in aqnas:
         ques_hash[aqna.qna_readable_id] = str(aqna.id)
