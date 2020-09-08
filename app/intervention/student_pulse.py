@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 
+import cv2.cv2 as cv2
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
@@ -24,6 +25,7 @@ from loguru import logger
 # StudentPulseManager.should_intervene_student_group('5f05f687ed068084942f5791', '101')
 from app.config import get_settings
 from app.db.database import DbMgr
+from app.intervention.Tracker import TrackerWrapper
 from app.models.pulse import SessionPulse, SessionPulseStudent, StudentIntervention, StudentGroupIntervention, \
     SessionAttendance
 from app.models.pulse_events import PulseProcessing
@@ -48,16 +50,31 @@ class StudentPulseManager:
     ATTENDANCE_PROCESS_PERIOD_SECONDS = 10
     ATTENDANCE_MAX_PARALLEL_RUNS = 1
     VALID_ACTIVITIES = ['studying', 'writing', 'questioning', 'raising_hand', 'thinking']
+    IOU_THRESHOLD = 0.7
+    FRAMES_ALLOWED_TO_TRACK = 300
+
+    __trackers = {}
 
     @staticmethod
     def pulse_as_dict(pulse):
-        if pulse.face_recognition_event and pulse.gaze_detection_event and pulse.session:
-            new_dict = {'session': pulse.session, 'student_id': pulse.face_recognition_event.face_id,
-                        'pitch': pulse.gaze_detection_event.pitch, 'yaw': pulse.gaze_detection_event.yaw,
-                        'roll': pulse.gaze_detection_event.roll, 'frame_id': pulse.frame_number,
-                        'timestamp': pulse.person_detection_event.detected_at}
-            if pulse.action_recognition_event:
-                new_dict['activity']: pulse.action_recognition_event.actions
+        if pulse.session and pulse.face_detection_event:
+            new_dict = {'session': pulse.session, 'frame_id': pulse.frame_number,
+                        'top_left_x': pulse.face_detection_event.top_left_x,
+                        'top_left_y': pulse.face_detection_event.top_left_y,
+                        'bottom_right_x': pulse.face_detection_event.bottom_right_x,
+                        'bottom_right_y': pulse.face_detection_event.bottom_right_y,
+                        }
+            if pulse.face_recognition_event:
+                new_dict['student_id'] = pulse.face_recognition_event.face_id
+            else:
+                new_dict['student_id'] = None
+
+            if pulse.gaze_detection_event:
+                new_dict['pitch'] = pulse.gaze_detection_event.pitch
+                new_dict['yaw'] = pulse.gaze_detection_event.yaw
+                new_dict['roll'] = pulse.gaze_detection_event.roll
+                if pulse.action_recognition_event:
+                    new_dict['activity']: pulse.action_recognition_event.actions
             return new_dict
         else:
             return None
@@ -309,6 +326,104 @@ class StudentPulseManager:
     #                                                                               session_id,
     #                                                                               str(student_group.id),
     #                                                                               student_grp_engagement / students_in_frame)
+    @staticmethod
+    def get_bbox_from_corners(top_left_x, top_left_y, bottom_right_x, bottom_right_y):
+        return (
+            top_left_x,
+            top_left_y,
+            abs(top_left_x - bottom_right_x),
+            abs(top_left_y - bottom_right_y)
+        )
+
+    @staticmethod
+    def bb_intersection_over_union(boxA, boxB):
+        # determine the (x, y)-coordinates of the intersection rectangle
+        xA = max(boxA[0], boxB[0])
+        yA = max(boxA[1], boxB[1])
+        xB = min(boxA[2], boxB[2])
+        yB = min(boxA[3], boxB[3])
+        # compute the area of intersection rectangle
+        interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+        # compute the area of both the prediction and ground-truth
+        # rectangles
+        boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+        boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+        # compute the intersection over union by taking the intersection
+        # area and dividing it by the sum of prediction + ground-truth
+        # areas - the interesection area
+        iou = interArea / float(boxAArea + boxBArea - interArea)
+        if iou > 0:
+            print(iou)
+        # return the intersection over union value
+        return iou
+
+    @staticmethod
+    def get_frame_pulse_with_trackers(frame_df):
+
+        # frame_info = frame_df
+
+        students_present_in_frame = set([])
+        tracker_keys = set(StudentPulseManager.__trackers.keys())
+
+        bbox_dict = {}
+        frame = frame_df.iloc[0]['frame_id']
+        # {'session': pulse.session, 'frame_id': pulse.frame_number,
+        #  'top_left_x': pulse.face_detection_event.top_left_x,
+        #  'bottom_right_x': pulse.face_detection_event.bottom_right_x,
+        #  'bottom_right_y': pulse.face_detection_event.bottom_right_y,
+        #  }
+
+        for index, row in frame_df.iterrows():
+            if 'student_id' in frame_df.columns and row['student_id'] and row['student_id'] not in students_present_in_frame:
+                processed_student_id = row['student_id']
+                students_present_in_frame.add(processed_student_id)
+                StudentPulseManager.__trackers[processed_student_id] = TrackerWrapper(cv2.TrackerMOSSE_create(),
+                                                                                      processed_student_id,
+                                                                  frame,
+                                                                  StudentPulseManager.get_bbox_from_corners
+                                                                  (row['top_left_x'], row['top_left_y'],
+                                                                   row['bottom_right_x'],
+                                                                   row['bottom_right_y']))
+                print("Init/Reinit Tracker", processed_student_id)
+
+        for lost_student in (tracker_keys - students_present_in_frame):
+            tracked_success, bbox_value = StudentPulseManager.__trackers[lost_student].update_tracker(frame)
+            delete_student = False
+            p1 = (int(bbox_value[0]), int(bbox_value[1]))
+            p2 = (int(bbox_value[0] + bbox_value[2]), int(bbox_value[1] + bbox_value[3]))
+            # Frames check here
+            if StudentPulseManager.__trackers[lost_student].num_frames_tracked > StudentPulseManager.FRAMES_ALLOWED_TO_TRACK:
+                delete_student = True
+                print("Face recog hasn't detected {} in {} frames".format(lost_student, StudentPulseManager.FRAMES_ALLOWED_TO_TRACK))
+            if delete_student:
+                del StudentPulseManager.__trackers[lost_student]
+                continue
+            # IOU Check
+            lost_student_bbox = (p1[0], p1[1], p2[0], p2[1])
+            for face_recog_student in students_present_in_frame:
+                if not tracked_success:
+                    continue
+                face_recog_bbox = (
+                    StudentPulseManager.__trackers[face_recog_student].object_bbox[0], StudentPulseManager.__trackers[face_recog_student].object_bbox[1],
+                    StudentPulseManager.__trackers[face_recog_student].object_bbox[0] + StudentPulseManager.__trackers[face_recog_student].object_bbox[2],
+                    StudentPulseManager.__trackers[face_recog_student].object_bbox[1] + StudentPulseManager.__trackers[face_recog_student].object_bbox[3])
+                if StudentPulseManager.bb_intersection_over_union(lost_student_bbox, face_recog_bbox) > StudentPulseManager.IOU_THRESHOLD:
+                    print(
+                        "{} is clashing with {}. IOU above {}".format(lost_student, face_recog_student, StudentPulseManager.IOU_THRESHOLD))
+                    delete_student = True
+                    break
+
+            if delete_student:
+                del StudentPulseManager.__trackers[lost_student]
+                continue
+
+            bbox_dict[frame + str(p1[0]) + str(p1[1]) + str(p2[0]) + str(p2[1])] = StudentPulseManager.__trackers[lost_student].identifier
+
+        for row in frame_df.iterrows():
+            if 'student_id' in frame_df.columns and row['student_id'] and row['student_id'] not in students_present_in_frame:
+                row['student_id'] = bbox_dict[frame+frame_df['top_left_x']+frame_df['top_left_y']+
+                                                                   frame_df['bottom_right_x']+frame_df['bottom_right_y']]
+
 
     @staticmethod
     def calculate_attentiveness(start_time_of_events, end_time_of_events):
@@ -356,6 +471,8 @@ class StudentPulseManager:
                     avg_frame_pitch = frame_agg_df['pitch_average'].iloc[0]
                     avg_frame_yaw = frame_agg_df['yaw_average'].iloc[0]
                     # print("Average Frame pitch is: ", avg_frame_pitch, "Average Frame yaw is: ", avg_frame_yaw)
+
+                    # frame_df = StudentPulseManager.get_frame_pulse_with_trackers(frame_df)
 
                     for student_id in frame_df['student_id'].unique():
 
