@@ -158,7 +158,7 @@ class AssignmentQnASubmission(AssignmentQnASubmissionCreate):
     student: Student
     datetime_modified: datetime
     score: Optional[int]
-    scoring_state: ScoringState
+    scoring_state: Optional[ScoringState] = None
     model_similarity: Dict[str, float] = None
     final_similarity: Dict[str, float] = None
 
