@@ -41,6 +41,7 @@ class StudentPulseManager:
     STUDENT_INTERVENTION_THRESHOLD_ATTENTIVENESS = 0.5
     STUDENT_GROUP_INTERVENTION_THRESHOLD_ATTENTIVENESS = 0.6
     PROCESS_PERIOD_SECONDS = 1
+    INTERVENTION_DELAY = 10
     POLL_PERIOD_SECONDS = 1
     MAX_PARALLEL_RUNS = 1
     ATTENDANCE_POLL_PERIOD_SECONDS = 10
@@ -154,9 +155,10 @@ class StudentPulseManager:
     @staticmethod
     def upsert_student_group_intervention(events_end_time, events_start_time, session, student_group_name,
                                           student_group_attentiveness):
-        sgi = StudentGroupIntervention.objects(Q(intervention_reason="ATTENTIVENESS") &
-                                               Q(session=session) & Q(student_group_name=student_group_name) & Q(
-            intervention_period_end=events_end_time))
+        min_events_end_time = events_end_time - datetime.timedelta(seconds=StudentPulseManager.INTERVENTION_DELAY)
+        sgi = StudentGroupIntervention.objects(
+            Q(intervention_reason="ATTENTIVENESS") & Q(session=session) & Q(student_group_name=student_group_name) & Q(
+                intervention_period_end__gte=min_events_end_time))
 
         if not sgi:
             sgi_obj = StudentGroupIntervention()
@@ -172,12 +174,15 @@ class StudentPulseManager:
         else:
             sgi_obj = sgi.first()
             sgi_obj.intervention_reason_value = student_group_attentiveness
+            sgi_obj.intervention_reason = "ATTENTIVENESS"
             sgi_obj.save()
 
     @staticmethod
     def upsert_student_intervention(events_end_time, events_start_time, session, student, student_attentiveness):
+        min_events_end_time = events_end_time - datetime.timedelta(seconds=StudentPulseManager.INTERVENTION_DELAY)
+
         si_q = StudentIntervention.objects(Q(intervention_reason="ATTENTIVENESS") & Q(session=session) &
-                                           Q(student=student) & Q(intervention_period_end=events_end_time))
+                                           Q(student=student) & Q(intervention_period_end__gte=min_events_end_time))
 
         if not si_q:
             si = StudentIntervention()
@@ -193,6 +198,7 @@ class StudentPulseManager:
         else:
             si = si_q.first()
             si.intervention_reason_value = student_attentiveness
+            si.intervention_reason = "ATTENTIVENESS"
             si.save()
 
     @staticmethod
@@ -605,7 +611,7 @@ class StudentPulseManager:
             ssp_obj.save()
 
 
-date_time_str = '2020-08-30 13:00:00'
+date_time_str = '2020-08-25 13:00:00'
 __processing_start_time = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
 __attendance_processing_start_time = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
 
