@@ -1,14 +1,13 @@
+from datetime import datetime
 from typing import List, Optional, Any, Union, Dict
 
 from pydantic import BaseModel, PositiveInt
-from datetime import datetime
 
+from app.models.enums import Subject, Grade, Curriculum, ScoringState, SubmissionState
+from app.schemas.mongo_helpers import ObjectIdStr
+from app.schemas.school import KlassWithoutStudentList
 from app.schemas.student import Student
 from app.schemas.teacher import Teacher
-from app.schemas.school import Klass, KlassWithoutStudentList
-from app.models.enums import Subject, Grade, AssignmentState, Curriculum, ScoringState, SubmissionState
-
-from app.schemas.mongo_helpers import ObjectIdStr
 
 
 class FactContentWithoutSerializedFacts(BaseModel):
