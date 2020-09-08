@@ -48,8 +48,8 @@ class SessionIntervention(BaseModel):
 
 
 class SessionPulseAggregated(BaseModel):
-    engagement: int
-    attentiveness: int
+    engagement: Optional[float]
+    attentiveness: Optional[float]
 
     class Config:
         orm_mode = True

@@ -174,8 +174,10 @@ def seed_assignments():
 
 def seed_assignments_questions(settings):
     print("***************************************************")
-    asses = Assignment.objects()
+    asses = AssignmentQnA.objects()
     for ass in asses:
+        items = AssignmentQnA.objects(assignment=ass).delete()
+        print("AssQNA deleted: {}".format(items))
         i = 1
         for qna in subj_qnas:
             latest_version = qna.content[0].version
@@ -199,6 +201,7 @@ def seed_assignments_questions(settings):
 def seed_submissions(settings):
     print("***************************************************")
     ass = Assignment.objects().first()
+
     aqnas = AssignmentQnA.objects(assignment=str(ass.id))
     print("QNAS:", aqnas)
     students = ass.klass.members
