@@ -34,8 +34,3 @@ class TestMongo(unittest.TestCase):
         ans_content_list.append(ans1)
         ans_content_list.append(ans2)
         utils_grading.update_assignment_qna_facts(id=aqna_id, ans_content_list=ans_content_list)
-
-    def test_update_assignment_qna_submission_facts(self):
-        aqnas_id = "5f4ba670c557967b4cf6d333"
-        facts = [{'bleh': 'bloh'}, [1, 2, 3]]
-        utils_grading.update_assignment_qna_submission_facts(aqnas_id, facts)

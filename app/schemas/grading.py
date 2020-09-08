@@ -1,19 +1,28 @@
-from typing import List, Optional, Any, Union
+from datetime import datetime
+from typing import List, Optional, Any, Union, Dict
 
 from pydantic import BaseModel, PositiveInt
-from datetime import datetime
-from app.schemas.teacher import Teacher
-from app.schemas.school import Klass, KlassWithoutStudentList
-from app.models.enums import Subject, Grade, AssignmentState, Curriculum, ScoringState, SubmissionState
 
+from app.models.enums import Subject, Grade, Curriculum, ScoringState, SubmissionState
 from app.schemas.mongo_helpers import ObjectIdStr
+from app.schemas.school import KlassWithoutStudentList
+from app.schemas.student import Student
+from app.schemas.teacher import Teacher
 
 
-class FactContent(BaseModel):
-    fact: str
-    sentence: str
+class FactContentWithoutSerializedFacts(BaseModel):
+    fact_id: Optional[int] = None
+    fact: Optional[str] = None
+    sentence: Optional[str] = None
+    score: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
+
+class FactContent(FactContentWithoutSerializedFacts):
+
     serialized_fact: Any
-    score: Optional[int]
 
     class Config:
         orm_mode = True
@@ -46,7 +55,7 @@ class AnsContent(BaseModel):
 
 class SubjAnsContent(AnsContent):
     answer: str
-    facts: Optional[List[FactContent]] = None
+    facts: Optional[List[FactContentWithoutSerializedFacts]] = []
 
     class Config:
         orm_mode = True
@@ -64,7 +73,7 @@ class SubjQnAContent(BaseModel):
     answer: str
     version: int
     datetime_modified: datetime
-    facts: Optional[List[FactContent]] = None
+    facts: Optional[List[FactContentWithoutSerializedFacts]] = None
 
     class Config:
         orm_mode = True
@@ -95,10 +104,11 @@ class ObjQnA(QnA):
 
 
 class AssignmentQnA(BaseModel):
+    id: ObjectIdStr
     qna: Union[SubjQnA, ObjQnA]
     qna_version: Optional[PositiveInt] = None
     qna_readable_id: str
-    base_facts: Optional[List[FactContent]] = []
+    base_facts: Optional[List[FactContentWithoutSerializedFacts]] = []
     max_score: PositiveInt
 
     class Config:
@@ -112,8 +122,8 @@ class AssignmentQnAInDB(AssignmentQnA):
         orm_mode = True
 
 
-class AssignmentQnAWithTopAnswers(AssignmentQnA):
-    base_facts: List[FactContent]
+class AssignmentQnAWithBaseFacts(AssignmentQnA):
+    base_facts: List[FactContentWithoutSerializedFacts]
 
     class Config:
         orm_mode = True
@@ -129,22 +139,37 @@ class Assignment(BaseModel):
     klass: KlassWithoutStudentList
     datetime_modified: datetime
     state: str
-    qnas: List[AssignmentQnA] = []
+    qnas: List[AssignmentQnAWithBaseFacts] = []
 
     class Config:
         orm_mode = True
 
 
-class AssignmentQnASubmission(BaseModel):
-    id: ObjectIdStr
-    student: ObjectIdStr
-    assignment: ObjectIdStr
-    aqna: AssignmentQnA
-    answer: Union[SubjAnsContent, ObjAnsContent]
-    datetime_modified: datetime
-    score: int
+class AssignmentQnASubmissionCreate(BaseModel):
+    answer: Union[ObjAnsContent, SubjAnsContent]
     state: SubmissionState
-    scoring_state: Optional[ScoringState] = ScoringState.Pending
 
     class Config:
         orm_mode = True
+
+
+class AssignmentQnASubmission(AssignmentQnASubmissionCreate):
+    id: ObjectIdStr
+    student: Student
+    datetime_modified: datetime
+    score: Optional[int]
+    scoring_state: ScoringState
+    model_similarity: Dict[str, float] = None
+    final_similarity: Dict[str, float] = None
+
+    class Config:
+        orm_mode = True
+
+
+class AssignmentQnASubmissionScoringUpdate(BaseModel):
+    final_similarity: Dict[str, float] = None
+    score: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+

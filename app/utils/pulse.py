@@ -59,9 +59,9 @@ def get_session_interventions(session_id: str, from_datetime: Optional[datetime]
     interventions = []
     try:
         if from_datetime is not None and to_datetime is not None:
-            session_int_itr = models_pulse.SessionPulse.objects(session=session_id,
-                                                                datetime_sequence__lte=to_datetime,
-                                                                datetime_sequence__gte=from_datetime)
+            session_int_itr = models_pulse.SessionIntervention.objects(session=session_id,
+                                                                       datetime_sequence__lte=to_datetime,
+                                                                       datetime_sequence__gte=from_datetime)
         else:
             session_int_itr = models_pulse.SessionIntervention.objects(session=session_id)
         for sess_int in session_int_itr:
@@ -90,8 +90,11 @@ def get_session_pulse_aggregated(id: str, to_datetime: Optional[datetime]):
     spa = None
     try:
         if to_datetime is None:
-            sess = models_session.Session.objects.only('actual_end_time').get(id=id)
-            to_datetime = sess.actual_end_time
+            sess = models_session.Session.objects.only('actual_end_time', 'scheduled_end_time').get(id=id)
+            if sess.actual_end_time is not None:
+                to_datetime = sess.actual_end_time
+            else:
+                to_datetime = sess.scheduled_end_time
         logger.debug("to_datetime is now: {}".format(to_datetime))
         attentiveness = models_pulse.SessionPulse.objects(session=id, datetime_sequence__lte=to_datetime,
                                                           student_group_name='all').average('attentiveness')

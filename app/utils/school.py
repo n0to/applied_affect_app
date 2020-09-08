@@ -5,7 +5,7 @@ import app.schemas.school as schemas_school
 
 
 def get_camera(id: str):
-    out_camera = []
+    out_camera = None
     try:
         camera = models_school.Camera.objects.get(id=id)
         out_camera = schemas_school.Camera.from_orm(camera)
@@ -19,5 +19,11 @@ def get_school(id: str):
 
 
 def get_klass(id: str):
-    pass
+    out_klass = None
+    try:
+        klass = models_school.Klass.objects.get(id=id)
+        out_klass = schemas_school.Klass.from_orm(klass)
+    except DoesNotExist:
+        logger.info("No klass exists with id: {}".format(id))
+    return out_klass
 

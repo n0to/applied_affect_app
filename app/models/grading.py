@@ -10,7 +10,7 @@ from mongoengine import (
     ListField,
     ObjectIdField,
     DynamicField,
-    EmbeddedDocumentField, SequenceField, SortedListField, EmbeddedDocumentListField, FloatField)
+    EmbeddedDocumentField, SequenceField, SortedListField, EmbeddedDocumentListField, FloatField, DictField)
 
 from app.models.school import Klass
 from app.models.student import Student
@@ -18,6 +18,7 @@ from app.models.teacher import Teacher
 
 
 class FactContent(EmbeddedDocument):
+    fact_id = SequenceField()
     fact = StringField()
     sentence = StringField()
     serialized_fact = DynamicField()
@@ -102,5 +103,7 @@ class AssignmentQnASubmission(Document):
     score = IntField()
     state = StringField()
     scoring_state = StringField()
+    model_similarity = DictField()
+    final_similarity = DictField()
 
 

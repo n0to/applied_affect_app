@@ -1,3 +1,4 @@
+import app.utils.facts
 from app.models.pulse import *
 from app.models.school import *
 from app.models.session import *
@@ -77,7 +78,7 @@ def read_vars():
     klasses_itr = Klass.objects()
     for k in klasses_itr:
         klasses.append(k)
-    with open(r'subj_quest.yaml') as file:
+    with open(r'dummy_data/subj_quest.yaml') as file:
         print("***************************************************")
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
@@ -85,7 +86,7 @@ def read_vars():
         for k, v in subj_data.items():
             print(k, v)
 
-    with open(r'obj_quest.yaml') as file:
+    with open(r'dummy_data/obj_quest.yaml') as file:
         print("***************************************************")
         # The FullLoader parameter handles the conversion from YAML
         # scalar values to Python the dictionary format
@@ -175,11 +176,13 @@ def seed_assignments_questions(settings):
     print("***************************************************")
     asses = Assignment.objects()
     for ass in asses:
+        #items = AssignmentQnA.objects(assignment=ass).delete()
+        #print("AssQNA deleted: {}".format(items))
         i = 1
         for qna in subj_qnas:
             latest_version = qna.content[0].version
             # get facts here
-            facts = utils_grading.get_facts(content=qna.content[0].answer, metadata={}, settings=settings)
+            facts = app.utils.facts.get_facts(content=qna.content[0].answer, metadata={}, settings=settings)
             efacts = []
             for f in facts:
                 efact = FactContent(**f.dict())
@@ -190,6 +193,7 @@ def seed_assignments_questions(settings):
                                  base_facts=efacts,
                                  qna_readable_id="QNA{}".format(i),
                                  max_score=qna.max_score)
+            print(aqna.to_mongo())
             i = i + 1
             aqna.save()
             print(aqna.to_mongo())
@@ -201,10 +205,11 @@ def seed_submissions(settings):
     aqnas = AssignmentQnA.objects(assignment=str(ass.id))
     print("QNAS:", aqnas)
     students = ass.klass.members
-    submission_dir = "/home/neo/Downloads/submission/"
+    submission_dir = "dummy_data/submission/"
     ques_hash = {}
     for aqna in aqnas:
         ques_hash[aqna.qna_readable_id] = str(aqna.id)
+        num_del = AssignmentQnASubmission.objects(aqna=aqna).delete()
     pp.pprint(ques_hash)
     for student in students:
         sub_file = submission_dir + student.school_id + ".yaml"
@@ -218,7 +223,7 @@ def seed_submissions(settings):
             for qna, val in questions.items():
                 aqna_id = ques_hash[qna]
                 ans = val['A']
-                facts = utils_grading.get_facts(content=ans, metadata={}, settings=settings)
+                facts = app.utils.facts.get_facts(content=ans, metadata={}, settings=settings)
                 efacts = []
                 for f in facts:
                     efact = FactContent(**f.dict())
@@ -238,29 +243,10 @@ def score_submissions(settings):
     print("***************************************************")
     saqnas = AssignmentQnASubmission.objects()
     for saqna in saqnas:
-        base_facts = saqna.aqna.base_facts
-        answer_facts = saqna.answer.facts
-        max_score = saqna.aqna.max_score
-        base_fact_list = []
-        ans_fact_list = []
-        for f in base_facts:
-            base_fact_list.append(schemas_grading.FactContent.from_orm(f))
-        for f in answer_facts:
-            ans_fact_list.append(schemas_grading.FactContent.from_orm(f))
-
-        similarity = utils_grading.compare_facts(base_facts=base_fact_list,
-                                                 answer_facts=ans_fact_list,
-                                                 metadata={},
-                                                 settings=settings)
-        if similarity == -1000:
-            state = ScoringState.Unavailable
-            pp.pprint("$$$$$$$ CANT DO $$$$$$$$$")
-        else:
-            state = ScoringState.Scored
-            saqna.score = similarity * max_score
-        saqna.scoring_state = state
-        #pp.pprint(saqna.to_mongo())
-        saqna.save()
+        aqna_id = saqna.aqna.id
+        student_id = saqna.student.id
+        print("Triggering scoring for {} {}".format(aqna_id, student_id))
+        app.utils.facts.trigger_scoring(aqna_id=aqna_id, student_id=student_id, settings=settings)
 
 
 main()
