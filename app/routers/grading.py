@@ -50,24 +50,6 @@ def get_assignment_qna(id: str):
     return ass_qna
 
 
-''' 
-@router.put("/assignment_qna/{id}/facts")
-def update_assignment_qna_facts(id: str, facts: List[Any]):
-    resp = utils_grading.update_assignment_qna_facts(id, facts)
-    if not resp:
-        raise HTTPException("Couldn't update assignment_qna facts")
-    return resp
-
-
-@router.put('/assignment_qna_submission/{id}/facts')
-def update_assignment_submission_facts(id: str, ans_content: List[AnsContent]):
-    resp = utils_grading.update_assignment_qna_submission_facts(id, ans_content)
-    if not resp:
-        raise HTTPException("Couldn't update assignment qna submission facts")
-    return resp
-'''
-
-
 @router.get('/assignment_qna/{aqna_id}/submissions', response_model=List[AssignmentQnASubmission])
 def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None):
     resp = utils_grading.get_assignment_qna_submission(aqna_id=aqna_id, student_id=student_id)
@@ -93,8 +75,20 @@ def trigger_scoring(aqna_id: str, s_id: Optional[str] = None):
 
 
 @router.put("/assignment_qna/{aqna_id}/base_fact_scores", response_model=int)
-def modify_assqna_base_facts(aqna_id: str, base_fact_list: List[FactContentWithoutSerializedFacts]):
-    num_updated = utils_grading.modify_assqna_base_facts(aqna_id=aqna_id, base_fact_list=base_fact_list)
+def modify_assqna_base_facts_scores(aqna_id: str, base_fact_list: List[FactContentWithoutSerializedFacts]):
+    num_updated = utils_grading.modify_assqna_base_facts_scores(aqna_id=aqna_id, base_fact_list=base_fact_list)
+    return num_updated
+
+
+@router.post("/assignment_qna/{aqna_id}/base_facts", response_model=int)
+def add_assqna_base_facts(aqna_id: str, base_fact_list: List[FactContentWithoutSerializedFacts]):
+    num_updated = utils_grading.add_assqna_base_facts(aqna_id=aqna_id, base_fact_list=base_fact_list)
+    return num_updated
+
+
+@router.delete("/assignment_qna/{aqna_id}/base_facts", response_model=int)
+def del_assqna_base_facts(aqna_id: str, base_fact_list: List[FactContentWithoutSerializedFacts]):
+    num_updated = utils_grading.del_assqna_base_facts(aqna_id=aqna_id, base_fact_list=base_fact_list)
     return num_updated
 
 

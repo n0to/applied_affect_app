@@ -67,7 +67,6 @@ def search_assignments(max_records: PositiveInt, **kwargs):
     return out_asses
 
 
-# Todo: Implement
 def post_qna_submission(aqna_id: str, s_id: str,
                         submission: schemas_grading.AssignmentQnASubmissionCreate):
     logger.bind(payload=submission.dict()).debug("Posting aqna:{} for student: {}".format(aqna_id, s_id))
@@ -92,16 +91,6 @@ def post_qna_submission(aqna_id: str, s_id: str,
         state=submission.state,
         upsert=True
     )
-    return num_updated
-
-
-def update_assignment_qna_facts(id: str, ans_content_list: List[schemas_grading.SubjAnsContent]):
-    logger.bind(payload=ans_content_list).debug("Updating AQNA {} with content: ".format(id))
-    ans_emb_list = []
-    for ans in ans_content_list:
-        ans_emb = models_grading.SubjAnsContent(**ans.dict())
-        ans_emb_list.append(ans_emb)
-    num_updated = models_grading.AssignmentQnA.objects(id=id).update(top_answers=ans_emb_list)
     return num_updated
 
 
@@ -154,14 +143,14 @@ def get_assignment_qna(id: str):
     return out_assqna
 
 
-def modify_assqna_base_facts(aqna_id: str, base_fact_list: List[schemas_grading.FactContentWithoutSerializedFacts]):
+def modify_assqna_base_facts_scores(aqna_id: str, base_fact_list: List[schemas_grading.FactContentWithoutSerializedFacts]):
     logger.bind(payload=base_fact_list).debug("Updating assqna {} with base_facts scores".format(aqna_id))
+    num_updated = 0
     try:
         aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
         fact_hash = {}
         for fact in base_fact_list:
             fact_hash[fact.fact_id] = fact
-        num_updated = 0
         for fact in aqna.base_facts:
             if fact.fact_id in fact_hash.keys():
                 logger.debug("Resetting score for fact {} with {}".format(fact.fact_id, fact_hash[fact.fact_id].score))
@@ -170,7 +159,48 @@ def modify_assqna_base_facts(aqna_id: str, base_fact_list: List[schemas_grading.
         aqna.save()
     except DoesNotExist:
         logger.info("No Assignment QnA exists with id {}".format(aqna_id))
-    return
+    return num_updated
+
+
+def add_assqna_base_facts(aqna_id: str, base_fact_list: List[schemas_grading.FactContentWithoutSerializedFacts]):
+    logger.bind(payload=base_fact_list).debug("Adding assqna {} with base_facts".format(aqna_id))
+    num_updated = 0
+    try:
+        aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
+        final_fact_additions = []
+        for fact in base_fact_list:
+            sentence = fact.sentence
+            facts = get_facts(content=sentence)
+            logger.bind(payload=facts).debug("Fact extractor returned:")
+            final_fact_additions.extend(facts)
+        for fact in final_fact_additions:
+            logger.bind(payload=fact.dict()).debug("Adding additional fact: ")
+            aqna.base_facts.append(models_grading.FactContent(**fact.dict()))
+            num_updated = num_updated + 1
+        aqna.save()
+    except DoesNotExist:
+        logger.info("No Assignment QnA exists with id {}".format(aqna_id))
+    return num_updated
+
+
+def del_assqna_base_facts(aqna_id: str, base_fact_list: List[schemas_grading.FactContentWithoutSerializedFacts]):
+    logger.bind(payload=base_fact_list).debug("Deleting assqna {} with base_facts ids".format(aqna_id))
+    try:
+        aqna = models_grading.AssignmentQnA.objects.get(id=aqna_id)
+        fact_list = []
+        for fact in base_fact_list:
+            fact_list.append(fact.fact_id)
+        num_updated = 0
+        updated_base_fact_list = []
+        for fact in aqna.base_facts:
+            if fact.fact_id not in fact_list:
+                updated_base_fact_list.append(fact)
+        num_updated = len(aqna.base_facts) - len(updated_base_fact_list)
+        aqna.base_facts = updated_base_fact_list
+        aqna.save()
+    except DoesNotExist:
+        logger.info("No Assignment QnA exists with id {}".format(aqna_id))
+    return num_updated
 
 
 def modify_assqna_submission_scores(id: str, scoring_update: schemas_grading.AssignmentQnASubmissionScoringUpdate):
