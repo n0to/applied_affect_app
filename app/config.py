@@ -6,7 +6,7 @@ import os
 
 @lru_cache()
 def get_settings():
-    deployment_environ = os.environ.get('AA_DEPLOYMENT_ENV', 'dev')
+    deployment_environ = os.environ.get('AA_DEPLOYMENT_ENV', 'test')
     curr_dir = os.path.dirname(os.path.realpath(__file__))
     file = "{}/{}.env".format(curr_dir, deployment_environ)
     if deployment_environ == 'test':
