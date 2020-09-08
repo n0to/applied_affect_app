@@ -30,8 +30,8 @@ class SessionPulse(Document):
 
 class SessionPulseStudent(Document):
     session = LazyReferenceField(Session)
-    attentiveness = IntField()
-    engagement = IntField()
+    attentiveness = DecimalField()
+    engagement = DecimalField()
     student = LazyReferenceField(Student)
     datetime_modified = DateTimeField(default=datetime.now())
     datetime_sequence = DateTimeField(default=datetime.now())

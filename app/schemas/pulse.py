@@ -24,8 +24,8 @@ class SessionAttendance(BaseModel):
 class SessionPulse(BaseModel):
     datetime_sequence: Optional[datetime]
     student_group_name: str
-    attentiveness: int
-    engagement: int
+    attentiveness: Optional[float]
+    engagement: Optional[float]
 
     class Config:
         orm_mode = True
@@ -34,8 +34,8 @@ class SessionPulse(BaseModel):
 class SessionPulseStudent(BaseModel):
     datetime_sequence: Optional[datetime]
     student_id: LazyReferenceStr = Field(alias='student')
-    attentiveness: int
-    engagement: int
+    attentiveness: Optional[float]
+    engagement: Optional[float]
 
     class Config:
         orm_mode = True
