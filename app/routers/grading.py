@@ -54,7 +54,7 @@ def get_assignment_qna(id: str):
 def get_assignment_qna_submission(aqna_id: str, student_id: Optional[str] = None):
     resp = utils_grading.get_assignment_qna_submission(aqna_id=aqna_id, student_id=student_id)
     if not len(resp):
-        raise HTTPException("Couldn't find any submissions for the assignment")
+        raise HTTPException(status_code=404, detail="Couldn't find any submissions for the assignment")
     return resp
 
 
