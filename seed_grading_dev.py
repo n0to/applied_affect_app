@@ -52,7 +52,7 @@ def main():
     # seed_assignments()
     # seed_assignments_questions(settings)
     # seed_submissions(settings)
-    # score_submissions(settings)
+    score_submissions(settings)
     # database.DbMgr.disconnect()
 
 
@@ -174,10 +174,10 @@ def seed_assignments():
 
 def seed_assignments_questions(settings):
     print("***************************************************")
-    asses = AssignmentQnA.objects()
+    asses = Assignment.objects()
     for ass in asses:
-        items = AssignmentQnA.objects(assignment=ass).delete()
-        print("AssQNA deleted: {}".format(items))
+        #items = AssignmentQnA.objects(assignment=ass).delete()
+        #print("AssQNA deleted: {}".format(items))
         i = 1
         for qna in subj_qnas:
             latest_version = qna.content[0].version
@@ -193,6 +193,7 @@ def seed_assignments_questions(settings):
                                  base_facts=efacts,
                                  qna_readable_id="QNA{}".format(i),
                                  max_score=qna.max_score)
+            print(aqna.to_mongo())
             i = i + 1
             aqna.save()
             print(aqna.to_mongo())
@@ -201,7 +202,6 @@ def seed_assignments_questions(settings):
 def seed_submissions(settings):
     print("***************************************************")
     ass = Assignment.objects().first()
-
     aqnas = AssignmentQnA.objects(assignment=str(ass.id))
     print("QNAS:", aqnas)
     students = ass.klass.members
@@ -209,6 +209,7 @@ def seed_submissions(settings):
     ques_hash = {}
     for aqna in aqnas:
         ques_hash[aqna.qna_readable_id] = str(aqna.id)
+        num_del = AssignmentQnASubmission.objects(aqna=aqna).delete()
     pp.pprint(ques_hash)
     for student in students:
         sub_file = submission_dir + student.school_id + ".yaml"
