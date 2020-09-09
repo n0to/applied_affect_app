@@ -1,8 +1,8 @@
 # applied_affect_app
 # Create a conda environment aa
-conda create -n aa python
+conda create -n aa_app python
 # Activate the conda environment
-conda activate aa
+conda activate aa_app
 # Install dependencies 
 pip install -r requirements.txt
 # Launch the service
@@ -14,7 +14,7 @@ Add /docs to the URL outputted by run.sh for example 127.0.0.1:8000/docs
 
 # Sample Data
 ## Teacher
-username: latashahenry36@indus.com
+username: chitranakra@indus.com
 password: foobar
 
 ## Session
@@ -44,3 +44,6 @@ docker run -it -p 42500:5000 registry.gitlab.com/n0t0/hermes_containers:allennlp
 
 # Caveats
 - As if now, only /users/me end point is under authorization. 
+
+# Build Docker container
+docker build -t aa_app ./

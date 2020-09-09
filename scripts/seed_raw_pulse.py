@@ -32,7 +32,7 @@ def main():
                            host=settings.mongo_host)
 
     # session_id = "5f4a5884ac84c57e9a43ad8a"  # Used with jijo
-    # session_id = "5f43b06862752155f1e7da87"   # Used with original
+    session_id = "5f43b06862752155f1e7da87"   # Used with original
     # session_id = "5f43b06862752155f1e7da94"   # Used with original2
 
     num_del = models_pulse_events.PulseProcessing.objects(session=session_id).delete()
@@ -48,8 +48,8 @@ def main():
     for student in students:
         student_school_ids.append(student.school_id)
 
-    pickle_file_path = "/home/neo/Downloads/cam_video_jijo_with_student_id_flattened_data.pkl"
-    # pickle_file_path = "/home/neo/Downloads/cam_video_original_with_student_id_flattened_data.pkl"
+    # pickle_file_path = "/home/neo/Downloads/cam_video_jijo_with_student_id_flattened_data.pkl"
+    pickle_file_path = "/home/neo/Downloads/cam_video_original_with_student_id_flattened_data.pkl"
     # pickle_file_path = "/home/neo/Downloads/cam_video_original2_with_student_id_flattened_data.pkl"
 
     models_pulse_events.PulseProcessing.objects(session="5f4a5884ac84c57e9a43ad8f").delete()
@@ -78,7 +78,7 @@ def main():
                 row[k]['detected_at'] = detected_at
             if k == 'face_recognition_event' and v is not None:
                 row[k]['face_id'] = faces[row[k]['face_id']]
-        obj = schemas_pulse_events.PulseProcessing(**row, frame_type="MIDDLE", image_url="http://foobar.com")
+        obj = schemas_pulse_events.PulseProcessing(**row, frame_type="INTERMEDIATE", image_url="http://foobar.com")
         # pp.pprint(obj.dict())
         upd = utils_pulse_events.upsert_pulse_event(session_id=session_id,
                                                     camera_id=camera_id,
