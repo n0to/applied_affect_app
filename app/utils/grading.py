@@ -8,7 +8,7 @@ import app.schemas.grading as schemas_grading
 import app.models.grading as models_grading
 import app.models.school as models_school
 from app.models.enums import Grade, Section, Subject, AssignmentState, SubmissionState, ScoringState
-from app.utils.facts import get_facts
+from app.utils.facts import get_facts, trigger_scoring
 
 
 def get_assignment(id: str, get_qnas: bool = False):
@@ -91,6 +91,7 @@ def post_qna_submission(aqna_id: str, s_id: str,
         state=submission.state,
         upsert=True
     )
+    trigger_scoring(aqna_id=aqna_id, student_id=s_id)
     return num_updated
 
 
